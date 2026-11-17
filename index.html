@@ -338,6 +338,83 @@ b { color: var(--accent-deep); font-weight: 700; }
   .setup-hero h1 { font-size: 46px; }
 }
 
+/* ===== v2 新增：城市输入 / buff 药丸 / 事件后果 ===== */
+.city-input {
+  width: 100%; padding: 14px 16px; font-size: 16px; font-weight: 600;
+  border: 2px solid var(--line); border-radius: 14px; background: #fff;
+  color: var(--ink); outline: none; -webkit-appearance: none;
+}
+.city-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(242,118,46,.15); }
+.field-hint.left { text-align: left; }
+
+.buff-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 0; }
+.buff-chip {
+  display: inline-block; padding: 4px 10px; font-size: 11.5px; font-weight: 700;
+  color: #9a5b1c; background: #ffedd9; border: 1px solid #f3c9a3;
+  border-radius: 999px;
+}
+.buff-chip:empty { display: none; }
+
+.event-result {
+  margin-bottom: 14px; padding: 12px 14px;
+  background: #fff6ea; border: 1.5px solid #f3d7b7; border-radius: 14px;
+  font-size: 13px; font-weight: 600; color: #7a5320; line-height: 1.7;
+}
+.event-result div + div { margin-top: 2px; }
+
+/* ===== v3 对话流 ===== */
+.chat { display: flex; flex-direction: column; gap: 12px; margin: 20px 0 8px; }
+.msg.sys { text-align: center; font-size: 12.5px; color: var(--muted); line-height: 1.7; padding: 0 12px; }
+.msg.axan { align-self: flex-start; max-width: 88%; }
+.msg.axan .who { font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--accent-deep); margin: 0 0 5px 4px; }
+.msg.axan .bubble {
+  background: #fff; border: 1.5px solid #f0e2d0; border-radius: 4px 18px 18px 18px;
+  padding: 13px 16px; font-size: 15px; line-height: 1.75; color: var(--ink);
+  box-shadow: 0 4px 14px rgba(160,120,80,.07);
+}
+.msg.me { align-self: flex-end; max-width: 84%; }
+.msg.me .bubble {
+  background: var(--accent); color: #fff; border-radius: 18px 18px 4px 18px;
+  padding: 12px 16px; font-size: 14.5px; line-height: 1.7; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(242,118,46,.22);
+}
+
+.notebook {
+  margin: 6px 0; padding: 12px 15px; background: #fffaf2;
+  border: 1.5px dashed #ebd7bd; border-radius: 14px;
+  font-size: 13px; color: #7a6247; line-height: 1.8;
+}
+.notebook-head { font-size: 10.5px; font-weight: 800; letter-spacing: .14em; color: #b08968; margin-bottom: 6px; }
+
+.epilogue { margin-top: 14px; padding: 20px; background: #fff8ec; border: 1.5px solid #f3e2c8; border-radius: 18px; }
+.epi-head { font-size: 11.5px; font-weight: 800; letter-spacing: .16em; color: #b08968; margin-bottom: 12px; }
+.epilogue p { font-size: 15px; line-height: 1.9; color: #4a3b2c; margin: 0 0 12px; }
+.epilogue p:last-child { margin-bottom: 0; }
+
+.advice-box { margin-top: 18px; padding: 20px 18px; background: #fff; border: 1.5px solid #f0e2d0; border-radius: 18px; }
+.advice-title { font-size: 11.5px; font-weight: 800; letter-spacing: .16em; color: #b08968; margin: 0 0 10px; }
+.advice-title + .advice-title { margin-top: 18px; }
+.risk-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f3e8d9; font-size: 13.5px; }
+.risk-row:last-child { border-bottom: 0; }
+.risk-name { font-weight: 800; width: 62px; flex: none; }
+.risk-level { font-size: 10.5px; font-weight: 800; padding: 2px 9px; border-radius: 999px; flex: none; }
+.lv-hi { background: #ffe0d4; color: #c2410c; }
+.lv-mid { background: #fff1cf; color: #a16207; }
+.lv-lo { background: #e8f5e2; color: #4d7c0f; }
+.risk-detail { color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+.advice-list { margin: 0; padding-left: 0; list-style: none; counter-reset: adv; }
+.advice-list li {
+  position: relative; counter-increment: adv; font-size: 14px; line-height: 1.85;
+  color: #3f352b; padding: 10px 0 10px 34px; border-bottom: 1px solid #f3e8d9;
+}
+.advice-list li:last-child { border-bottom: 0; }
+.advice-list li::before {
+  content: counter(adv); position: absolute; left: 0; top: 12px;
+  width: 20px; height: 20px; line-height: 20px; text-align: center;
+  background: var(--accent-soft); color: var(--accent-deep);
+  border-radius: 50%; font-size: 11px; font-weight: 800;
+}
+
 </style>
 </head>
 <body>
@@ -418,18 +495,27 @@ b { color: var(--accent-deep); font-weight: 700; }
 
         <div class="field">
           <label>城市</label>
-          <div class="seg" id="seg-city">
-            <button class="seg-btn selected" data-value="tier1">一线</button>
-            <button class="seg-btn" data-value="newtier">新一线</button>
-            <button class="seg-btn" data-value="hometown">老家</button>
-          </div>
+          <input type="text" id="in-city-name" list="city-list" class="city-input" placeholder="输入你所在的城市，如：上海" value="上海">
+          <datalist id="city-list">
+            <option value="北京"></option><option value="上海"></option><option value="广州"></option><option value="深圳"></option>
+            <option value="成都"></option><option value="杭州"></option><option value="重庆"></option><option value="武汉"></option>
+            <option value="西安"></option><option value="苏州"></option><option value="南京"></option><option value="长沙"></option>
+            <option value="郑州"></option><option value="青岛"></option><option value="合肥"></option><option value="宁波"></option>
+            <option value="厦门"></option><option value="昆明"></option>
+          </datalist>
+          <div class="field-hint left" id="city-tier-hint"></div>
+        </div>
+
+        <div class="field">
+          <label>家乡（回得去的地方）</label>
+          <input type="text" id="in-hometown" list="city-list" class="city-input" placeholder="输入老家城市，如：菏泽" value="老家县城">
+          <div class="field-hint left" id="hometown-hint"></div>
         </div>
       </div>
 
       <div class="preview" id="burn-preview"></div>
 
       <div class="setup-actions">
-        <button id="btn-random" class="btn soft">手气不错 🎲</button>
         <button id="btn-start" class="btn primary">开始这一年 →</button>
       </div>
       <p class="setup-footnote">12 个月，10 分钟，一个结局，一张人格卡。</p>
@@ -440,10 +526,11 @@ b { color: var(--accent-deep); font-weight: 700; }
   <section id="screen-game" class="screen">
     <header class="game-header">
       <div class="month-row">
-        <div class="month-label" id="month-tag"></div>
+        <div class="month-label" id="node-tag"></div>
         <div class="cash-tag" id="cash-tag"></div>
       </div>
       <div class="progress-dots" id="progress-dots"></div>
+      <div class="buff-chips" id="buff-chips"></div>
     </header>
 
     <div class="status-panels">
@@ -457,30 +544,12 @@ b { color: var(--accent-deep); font-weight: 700; }
       </div>
     </div>
 
-    <div class="event-card">
-      <div class="event-cat" id="event-cat"></div>
-      <h3 id="event-title"></h3>
-      <p id="event-text"></p>
-    </div>
-
+    <div class="chat" id="chat"></div>
     <div id="choice-area"></div>
   </section>
 
   <!-- 月度报告 -->
-  <section id="screen-report" class="screen">
-    <header class="game-header">
-      <div class="month-row">
-        <div class="month-label" id="report-month-tag"></div>
-      </div>
-      <div class="progress-dots" id="report-progress-dots"></div>
-    </header>
-    <div class="report-card">
-      <h3 id="report-title"></h3>
-      <div id="report-lines" class="report-lines"></div>
-      <div class="report-status" id="report-status"></div>
-    </div>
-    <button id="btn-next-month" class="btn primary wide">下个月 →</button>
-  </section>
+  
 
   <!-- 结局 -->
   <section id="screen-end" class="screen">
@@ -491,6 +560,15 @@ b { color: var(--accent-deep); font-weight: 700; }
     </header>
 
     <div id="montage" class="montage"></div>
+
+    <div class="epilogue" id="epilogue"></div>
+
+    <div class="advice-box" id="advice-box">
+      <div class="advice-title">风险画像</div>
+      <div class="risk-list" id="risk-list"></div>
+      <div class="advice-title">给你的建议</div>
+      <ol class="advice-list" id="advice-list"></ol>
+    </div>
 
     <div class="personality-box" id="personality-box">
       <div class="p-label">你 的 裸 辞 人 格</div>
@@ -538,6 +616,12 @@ b { color: var(--accent-deep); font-weight: 700; }
 
     familyCoef: { single: 1.0, partner: 1.25, kid: 1.7 },
     mortgageRate: 0.45,
+
+    CITY_TIER: {
+      tier1: ['北京', '上海', '广州', '深圳'],
+      newtier: ['成都', '杭州', '重庆', '武汉', '西安', '苏州', '南京', '长沙', '天津', '郑州', '青岛', '合肥', '宁波', '佛山', '东莞', '沈阳', '昆明', '大连', '厦门', '无锡', '福州', '济南']
+    },
+    cityFallback: 'newtier',
 
     mentality: {
       start: 82,
@@ -672,7 +756,7 @@ b { color: var(--accent-deep); font-weight: 700; }
     cond: function (s) { return s.month >= 2; },
     text: '刷了一晚上摆摊视频,你看着购物车里 39.9 的折叠桌和 89 的露营灯,犹豫要不要下单。',
     choice: { options: [
-      { label: '下单,去试', note: '赚 1500,心态 +2,重要的是「做了」', effects: { cash: 1500, mentality: 2 }, tags: { pragmatist: 1 } },
+      { label: '下单,去试', note: '赚 1500,心态 +2,重要的是「做了」', effects: { cash: 1500, mentality: 2 }, flags: { stallDone: true }, tags: { pragmatist: 1 } },
       { label: '算了,丢人', note: '心态 -2,但省下了 130 的运费', effects: { mentality: -2 } }
     ] } },
 
@@ -886,6 +970,96 @@ b { color: var(--accent-deep); font-weight: 700; }
     choice: { options: [
       { label: '发条动态,又删掉', note: '心态 -2,没人知道你到过凌晨三点', effects: { mentality: -2 } },
       { label: '给朋友发了句"在吗"', note: '心态 +3,他回:"我也没睡', effects: { mentality: 3 }, flags: { emoDone: true, socialSupport: true } }
+    ] } },
+
+  // ===== v2 扩充：更多带后果的选择 =====
+  { id: 'e_headhunter', cat: 'job', title: '猎头找上门', weight: 3, once: true,
+    cond: function (s) { return s.huntCount >= 1; },
+    text: '猎头加了你的微信：「有个岗位和您背景很匹配，方便发我一份最新简历和期望薪资吗？」',
+    choice: { options: [
+      { label: '报一个偏高的期望', note: '谈得好是底气，谈崩了是缘分', effects: { mentality: 2, offerBuff: { value: 0.08, months: 2 } }, tags: { gambler: 1 } },
+      { label: '报一个稳妥的数', note: '先拿面试机会再说', effects: { offerBuff: { value: 0.12, months: 2 } }, tags: { pragmatist: 1 } }
+    ] } },
+
+  { id: 'e_take_home_assignment', cat: 'job', title: '面试布置了回家作业', weight: 3, once: true,
+    cond: function (s) { return s.stats.interviews >= 3; },
+    text: '终面前，对方发来一份「小作业」：做一版方案，「看思路不看结果」。你知道这可能是白嫖，但你现在还需要这个机会。',
+    choice: { options: [
+      { label: '熬两个通宵做全套', note: '竞争力 +3，心态 -5，作品沉淀下来了', effects: { comp: 3, mentality: -5 }, tags: { grinder: 2 } },
+      { label: '做个框架交差', note: '心态 -1，竞争力 +1', effects: { comp: 1, mentality: -1 } }
+    ] } },
+
+  { id: 'e_colleague_borrow', cat: 'social', title: '老同事开口借钱', weight: 3, once: true,
+    cond: function (s) { return s.month >= 3; },
+    text: '老同事突然找你，支支吾吾半天：「借我三千周转一下，下个月还。」他不知道你现在也没有工资条。',
+    choice: { options: [
+      { label: '转了三千过去', note: '谁知道呢，也许下个月真能还', effects: { cash: -3000, mentality: -1 }, flags: { lentMoney: true } },
+      { label: '老实说了：我也在 gap', note: '心态 -2，但真实', effects: { mentality: -2 } }
+    ] } },
+
+  { id: 'e_borrow_return', cat: 'social', title: '钱还回来了', weight: 5, once: true,
+    cond: function (s) { return s.flags.lentMoney; },
+    effects: { cash: 3300, mentality: 4 },
+    text: '老同事把钱还了，还多转了三百：「谢谢你，那时候你也难。」你盯着那个红包，心里某块地方软了一下。' },
+
+  { id: 'e_stall_viral', cat: 'gig', title: '你的摊位被排到了', weight: 4, once: true,
+    cond: function (s) { return s.flags.stallDone && s.month >= 4; },
+    text: '你随手拍的摆摊 vlog 上了同城热榜，周末市集的摊位前排起了队。有人问：「老板，招兼职吗？」',
+    choice: { options: [
+      { label: '招了个学生兼职', note: '收入 +3000，你开始像个小老板', effects: { cash: 3000, mentality: 4 }, tags: { minimalist: 1 } },
+      { label: '自己扛，攒经验值', note: '累但每一分都是自己的：现金 +4000', effects: { cash: 4000, mentality: -1 } }
+    ] } },
+
+  { id: 'e_parents_visit', cat: 'family', title: '爸妈说要来看看你', weight: 3, once: true,
+    cond: function (s) { return s.month >= 3 && s.setup.family !== 'kid'; },
+    text: '妈妈说下周想来看看你住的地方。你看了眼堆着外卖盒的茶几，和三个月没换的床单。',
+    choice: { options: [
+      { label: '让他们来', note: '接待 -2000，但他们看到你过得还行，心态 +5', effects: { cash: -2000, mentality: 5 } },
+      { label: '编了个出差', note: '省了钱，但视频时妈妈盯着你的黑眼圈', effects: { mentality: -2 }, tags: { waverer: 1 } }
+    ] } },
+
+  { id: 'e_blind_date', cat: 'family', title: '亲戚介绍了个对象', weight: 3, once: true,
+    cond: function (s) { return s.setup.family === 'single' && s.month >= 4; },
+    text: '三姑发来一张照片：「人很踏实，在老家有房。」你问自己：现在的我，适合认识新的人吗？',
+    choice: { options: [
+      { label: '去见了', note: '聊得意外投机，心态 +4', effects: { mentality: 4 } },
+      { label: '推了', note: '先把日子过明白', effects: { mentality: -1 } }
+    ] } },
+
+  { id: 'e_resell_camera', cat: 'gig', title: '二手相机倒卖的机会', weight: 3, once: true,
+    cond: function (s) { return s.month >= 2 && !s.pendingBet && s.cash > 8000; },
+    text: '朋友说有一批二手相机低价收来，「转手每台能赚三成」。你研究了一晚上成色截图，手指在「打款」上方盘旋。',
+    choice: { options: [
+      { label: '押 5000 收一批', note: '小赌一把：两个月后开奖', bet: { kind: 'venture', stake: 5000 }, tags: { gambler: 2 } },
+      { label: '只帮他在朋友圈吆喝', note: '他请你吃了顿火锅', effects: { mentality: 2 } }
+    ] } },
+
+  { id: 'e_ai_gig', cat: 'gig', title: '用 AI 提效接单', weight: 3, once: true,
+    cond: function (s) { return s.comp >= 65; },
+    effects: { cashRate: 0.7, mentality: 3 },
+    text: '你把接活流程用 AI 重做了一遍：原来三天的活，现在一天半交付。客户加钱催你接下一单——原来效率才是新的工资。' },
+
+  { id: 'e_franchise_invite', cat: 'boom', title: '奶茶店加盟的诱惑', weight: 3, once: true,
+    cond: function (s) { return s.month >= 4 && !s.pendingBet; },
+    text: '大学室友的奶茶店开了第三家分店，他发来语音：「来我这边，加盟费给你打折。」你听着「老板」两个字，心跳漏了半拍。',
+    choice: { options: [
+      { label: '押 1.5 万加盟意向金', note: '半只脚踏进生意场：两个月后开奖', bet: { kind: 'venture', stake: 15000 }, tags: { gambler: 2 } },
+      { label: '周末先去他店里帮工看看', note: '零活收入 +，顺便看清楚一门生意', effects: { cashRate: 0.5, mentality: 2 }, tags: { pragmatist: 2 } }
+    ] } },
+
+  { id: 'e_dating_gap', cat: 'social', title: '刷到一个同款 gap 的人', weight: 3, once: true,
+    cond: function (s) { return s.month >= 5 && s.setup.family === 'single'; },
+    text: '交友软件上，对方的简介写着：「gap 中，在学冲浪。」你们匹配成功。这是你辞职后第一次觉得，孤独是可选的。',
+    choice: { options: [
+      { label: '认真聊了', note: '心态 +4，你们互换了各自的十二个月', effects: { mentality: 4 }, flags: { socialSupport: true } },
+      { label: '划走了', note: '不是不想，是还没准备好', effects: { mentality: -1 } }
+    ] } },
+
+  { id: 'e_cold_or_clinic', cat: 'accident', title: '感冒了，扛不扛', weight: 3, once: true,
+    text: '喉咙开始疼的时候，你就知道要出事。药店在楼下，医院在三公里外。',
+    choice: { options: [
+      { label: '去医院，一次搞清楚', note: '-800，心态 +2，心安是奢侈但值', effects: { cash: -800, mentality: 2 }, tags: { pragmatist: 1 } },
+      { label: '药店买点药硬扛', note: '-120，心态 -3，拖了一周才好', effects: { cash: -120, mentality: -3 } }
     ] } }
 
   ];
@@ -1079,6 +1253,7 @@ b { color: var(--accent-deep); font-weight: 700; }
       initialCash: setup.savings,
       mentality: CFG.mentality.start,
       comp: CFG.comp.start,
+      trust: 50,
       burnMods: [],
       frugalMonths: 0,
       offerBuff: [],
@@ -1112,7 +1287,8 @@ b { color: var(--accent-deep); font-weight: 700; }
         offersRejected: 0,
         minMentality: CFG.mentality.start,
         lowestCash: setup.savings,
-        peakCash: setup.savings
+        peakCash: setup.savings,
+        betStake: 0
       }
     };
   }
@@ -1187,6 +1363,8 @@ b { color: var(--accent-deep); font-weight: 700; }
       lines.push('求职运气上升');
     }
     if (effects.freeIncomeRate) s.freeIncomeRate = Math.max(s.freeIncomeRate, effects.freeIncomeRate);
+    if (effects.trust) { s.trust = clamp(s.trust + effects.trust, 0, 100); lines.push('信任 ' + fmtSigned(effects.trust)); }
+    if (effects.frugalMonths) { s.frugalMonths = Math.max(s.frugalMonths, effects.frugalMonths); lines.push('开始记账节流'); }
     return lines;
   }
 
@@ -1214,10 +1392,15 @@ b { color: var(--accent-deep); font-weight: 700; }
     if (opt.bigBet) s.bigBets++;
     if (opt.burnMod) s.burnMods.push(opt.burnMod);
     if (opt.bet) {
-      var stake = Math.round(s.cash * opt.bet.stakeRate / 100) * 100;
-      s.cash -= stake;
-      s.pendingBet = { kind: opt.bet.kind, stake: stake, startedMonth: s.month };
-      lines.push('押注 ' + stake + ' 元');
+      var stake = opt.bet.stake != null
+        ? Math.min(Math.round(opt.bet.stake / 100) * 100, Math.max(0, s.cash))
+        : Math.round(s.cash * opt.bet.stakeRate / 100) * 100;
+      if (stake > 0) {
+        s.cash -= stake;
+        s.stats.betStake += stake;
+        s.pendingBet = { kind: opt.bet.kind, stake: stake, startedMonth: s.month };
+        lines.push('押注 ' + stake + ' 元');
+      }
     }
     var endKey = null;
     if (opt.settleOffer) {
@@ -1273,6 +1456,14 @@ b { color: var(--accent-deep); font-weight: 700; }
     s.month++;
     s.phase = 'event';
     return E.drawEvent(s);
+  }
+
+  // 场景模式：不抽事件，直接推进一个月并结算
+  function planMonth(s, planId) {
+    if (s.ended) return null;
+    s.month++;
+    s.phase = 'plan';
+    return choosePlan(s, planId);
   }
 
   function offerChance(s) {
@@ -1438,6 +1629,18 @@ b { color: var(--accent-deep); font-weight: 700; }
         s.mentality = I.clamp(s.mentality - 6, 0, 100);
         lines.push('号没做起来：投入折半回来，心态 -6');
       }
+    } else if (bet.kind === 'venture') {
+      if (E._rng() < 0.5) {
+        var vgain = Math.round(bet.stake * 1.6 / 100) * 100;
+        s.cash += vgain;
+        s.mentality = I.clamp(s.mentality + 5, 0, 100);
+        lines.push('这把押对了：押注 ' + bet.stake + ' 变成了 ' + vgain + '，心态 +5');
+      } else {
+        var vback = Math.round(bet.stake * 0.5 / 100) * 100;
+        s.cash += vback;
+        s.mentality = I.clamp(s.mentality - 5, 0, 100);
+        lines.push('这把没赔到底：押注 ' + bet.stake + ' 只回来 ' + vback + '，心态 -5');
+      }
     }
   }
 
@@ -1507,7 +1710,14 @@ b { color: var(--accent-deep); font-weight: 700; }
       months: s.endMonth,
       interviews: s.stats.interviews,
       cashDrawdown: Math.max(0, s.initialCash - s.stats.lowestCash),
-      regret: regret(s)
+      regret: regret(s),
+      lowestCash: s.stats.lowestCash,
+      minMentality: s.stats.minMentality,
+      comp: s.comp,
+      betStake: s.stats.betStake,
+      offersRejected: s.stats.offersRejected,
+      socialSupport: !!s.flags.socialSupport,
+      trust: s.trust
     };
     return {
       endingKey: key,
@@ -1518,6 +1728,7 @@ b { color: var(--accent-deep); font-weight: 700; }
       personalityName: pName,
       roast: roast,
       stats: stats,
+      axanTook: !!s.flags.axanTook,
       salaryChange: s.employed && s.newSalary ? Math.round((s.newSalary / s.setup.salary - 1) * 100) : null
     };
   }
@@ -1529,6 +1740,7 @@ b { color: var(--accent-deep); font-weight: 700; }
   }
 
   E.startMonth = startMonth;
+  E.planMonth = planMonth;
   E.choosePlan = choosePlan;
   E.toPlan = toPlan;
   E.acceptOffer = acceptOffer;
@@ -1547,20 +1759,131 @@ b { color: var(--accent-deep); font-weight: 700; }
 
   var CFG = global.LC.CONFIG;
 
+  function burnOf(setup, cityKey, housing) {
+    return global.LC.Engine.burnRate({
+      setup: { city: cityKey, housing: housing, family: setup.family, salary: setup.salary },
+      burnMods: [],
+      frugalMonths: 0
+    });
+  }
+
+  function fmt(n) {
+    n = Math.round(n);
+    if (Math.abs(n) >= 10000) {
+      var v = n / 10000;
+      return (v >= 10 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, '')) + ' 万';
+    }
+    return n.toLocaleString();
+  }
+
+  function levelOf(v, hi, mid) {
+    return v >= hi ? '高' : v >= mid ? '中' : '低';
+  }
+
+  function analyze(result, setup) {
+    var st = result.stats;
+    var burn = burnOf(setup, setup.city, setup.housing) || 1;
+    var runwayNow = Math.floor(Math.max(0, st.lowestCash) / burn);
+
+    var risks = [
+      {
+        label: '现金流',
+        level: levelOf(-runwayNow, -1, -3),
+        detail: '最低点时存款 ' + fmt(Math.max(0, st.lowestCash)) + '，约等于 ' + runwayNow + ' 个月刚性支出'
+      },
+      {
+        label: '空窗期',
+        level: levelOf(st.months, 8, 5),
+        detail: '裸辞 ' + st.months + ' 个月；6 个月是面试官追问的分水岭'
+      },
+      {
+        label: '竞争力',
+        level: levelOf(100 - st.comp, 20, 10),
+        detail: '从 100 变成 ' + st.comp + (st.comp < 100 ? '，技能不练是会掉价的' : '')
+      },
+      {
+        label: '心态',
+        level: levelOf(100 - st.minMentality, 70, 50),
+        detail: '最低跌到 ' + st.minMentality + ' 分（满分 100）'
+      }
+    ];
+    if (st.betStake > 0) {
+      var ratio = st.betStake / setup.savings;
+      risks.push({
+        label: '押注',
+        level: levelOf(ratio, 0.3, 0.12),
+        detail: '共押 ' + fmt(st.betStake) + '，占存款 ' + Math.round(ratio * 100) + '%'
+      });
+    }
+
+    var advice = [];
+    var startRunway = Math.floor(setup.savings / (burnOf(setup, setup.city, setup.housing) || 1));
+
+    if (result.endingKey === 'crash') {
+      advice.push('这次是崩盘收场。存款和心态哪个先见底，哪个就是你的真实红线——下次先解决"每月有钱进"的问题（哪怕零活），再谈方向和体面。');
+    }
+    if (startRunway < 6) {
+      advice.push('开局你的安全垫只有 ' + startRunway + ' 个月刚性支出。行业里常用的裸辞安全线是 12 个月——不是攒够才能辞，是攒够了才有资格谈条件。');
+    }
+    if (st.months >= 6) {
+      advice.push('空窗 ' + st.months + ' 个月。面试时用三句话讲清楚：为什么离开、这几个月做了什么、为什么现在是回来的最佳时机。含糊其辞比 gap 本身更扣分。');
+    }
+    if (result.salaryChange !== null && result.salaryChange < 0) {
+      advice.push('降薪 ' + Math.abs(result.salaryChange) + '% 上岸是止损，不是失败。代价是薪资锚点被压低，入职后 12 个月内要用一次调薪或跳槽把基数拉回来。');
+    }
+    if (st.betStake > 0) {
+      advice.push('押注共 ' + fmt(st.betStake) + '，占存款 ' + Math.round(st.betStake / setup.savings * 100) + '%。给自己写死一条：单次押注不超过存款 20%，总仓位不超过 30%——输得起的是投资，输不起的是赌博。');
+    }
+    if (st.minMentality < 45) {
+      advice.push('心态最低到 ' + st.minMentality + ' 分。你这次靠' + (st.socialSupport ? '主动找人聊' : '自己硬扛') + '缓了过来。给自己设一条"求救线"：连续三天不想起床，就约人吃饭，或者回趟家。');
+    }
+    if (st.interviews === 0) {
+      advice.push('12 个月 0 次面试：问题通常不在能力，在渠道。内推 > 熟人 > 猎头 > 海投，先花一周把前同事约一遍，比投 200 份简历有用。');
+    }
+    if (result.endingKey === 'transform') {
+      advice.push('转型最难的不是开始，是第 13 个月还在不在。把新收入当项目管：每月记一次现金流，连续 3 个月为正再加投入。');
+    }
+    if (setup.hometownName) {
+      var hb = burnOf(setup, 'hometown', 'none');
+      var extra = Math.max(0, Math.floor(setup.savings / hb) - startRunway);
+      advice.push('回' + setup.hometownName + '是正经 Plan B：住家里月支出降到约 ' + fmt(hb) + '，同样的存款能多撑 ' + extra + ' 个月。别把它当成"失败选项"。');
+    }
+    if (advice.length < 3) {
+      advice.push('你这次的数据里没有大坑：安全垫 ' + startRunway + ' 个月、空窗 ' + st.months + ' 个月、心态最低 ' + st.minMentality + '。把这几个数存下来，下次辞职前对照一遍。');
+    }
+    if (advice.length < 3) {
+      advice.push('下次裸辞前，把"最坏情况"写成一行字：存款归零的月份 + 那时你打算干什么。写不出来，就还没准备好。');
+    }
+
+    return { risks: risks, advice: advice.slice(0, 4), runway: startRunway };
+  }
+
+  global.LC = global.LC || {};
+  global.LC.Advice = { analyze: analyze };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var CFG = global.LC.CONFIG;
+
   var CITY_NOUN = { tier1: '一线城市', newtier: '新一线', hometown: '老家县城' };
+  var cityName = function (setup) { return setup.cityName || CITY_NOUN[setup.city] || '这座城市'; };
   var FAMILY_NOUN = { single: '一个人住', partner: '和伴侣一起', kid: '拉着一个娃' };
   var GENDER_NOUN = { female: '女生', male: '男生', secret: '人' };
 
   function makeOpening(setup) {
     var wan = function (n) { return (n / 10000) >= 1 ? (n / 10000).toFixed(1).replace(/\.0$/, '') + ' 万' : n + ' 元'; };
     var openings = [
-      setup.age + ' 岁，一个在' + CITY_NOUN[setup.city] + '打拼的' + GENDER_NOUN[setup.gender] +
+      setup.age + ' 岁，一个在' + cityName(setup) + '打拼的' + GENDER_NOUN[setup.gender] +
         '，' + FAMILY_NOUN[setup.family] + '，月薪 ' + setup.salary + '。某天晚上加完班，你看着工牌上的自己，突然觉得够了。第二天，你裸辞了。存款 ' +
         wan(setup.savings) + '，是你全部的底气，也是你唯一的倒计时。',
-      '你在' + CITY_NOUN[setup.city] + '做了几年，' + (setup.age >= 33 ? '卡在三十好几' : '刚过二十五六') +
+      '你在' + cityName(setup) + '做了几年，' + (setup.age >= 33 ? '卡在三十好几' : '刚过二十五六') +
         '，月薪 ' + setup.salary + '，' + FAMILY_NOUN[setup.family] + '。辞掉工作的那天下午，你走出写字楼，阳光刺得你眯起眼——上一次这个点出门，还是去医院。存款 ' + wan(setup.savings) + '，从今天起，每一分都有它的意义。',
       '「提离职那天，我请自己吃了顿好的。」——你，' + setup.age + ' 岁，月薪 ' + setup.salary + '，' +
-        CITY_NOUN[setup.city] + '，存款 ' + wan(setup.savings) + '。' + FAMILY_NOUN[setup.family] +
+        cityName(setup) + '，存款 ' + wan(setup.savings) + '。' + FAMILY_NOUN[setup.family] +
         '的日子并不便宜，但那一刻你觉得，人生第一次这么贵得值得。这一年，从今天开始算。'
     ];
     return openings[setup.age % openings.length];
@@ -1621,7 +1944,7 @@ b { color: var(--accent-deep); font-weight: 700; }
   function opening(setup) {
     return llmChat(
       '用一两句话为以下人设写一个中文裸辞开场白，80字以内，语气克制、有画面感，不要鸡汤：' +
-      JSON.stringify({ age: setup.age, salary: setup.salary, savings: setup.savings, city: CITY_NOUN[setup.city] }),
+      JSON.stringify({ age: setup.age, salary: setup.salary, savings: setup.savings, city: cityName(setup) }),
       function () { return makeOpening(setup); }
     );
   }
@@ -1642,6 +1965,258 @@ b { color: var(--accent-deep); font-weight: 700; }
     opening: opening,
     endingQuote: endingQuote
   };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  function A(text) { return { t: 'axan', text: text }; }
+  function M(text) { return { t: 'me', text: text }; }
+  function S(text) { return { t: 'sys', text: text }; }
+
+  function wan(n) {
+    n = Math.round(Math.abs(n));
+    if (n >= 10000) { var v = n / 10000; return (v >= 10 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, '')) + ' 万'; }
+    return n.toLocaleString() + ' 元';
+  }
+
+  function runway(s) {
+    var burn = global.LC.Engine.burnRate(s) || 1;
+    return Math.max(0, Math.floor(s.cash / burn));
+  }
+
+  var SCENES = [
+
+    {
+      id: 's_first_week', at: 1, months: 1, time: '裸辞第一周',
+      lines: function () {
+        return [
+          A('先说清楚：我不是你的人生导师。我教了十年人怎么找工作，结果自己第一个被优化。'),
+          A('这周你只有一个任务——承认你已经不上班了。很多人卡在这一步，假装在休息，其实在等一个电话。'),
+          A('辞职这件事，你打算怎么跟人说？')
+        ];
+      },
+      tone: {
+        options: [
+          { label: '实话：我就是干不下去了', trust: 3, effects: { mentality: 2 }, reply: function () { return [A('行，至少你没骗自己。骗自己的人，面试官一眼就看得出来。')]; } },
+          { label: '包装：想休息一阵，看看机会', trust: 0, effects: { mentality: 1 }, reply: function () { return [A('这句话你在面试里也会说。记住它，到时候得说得比现在像。')]; } },
+          { label: '什么都不说', trust: -2, effects: { mentality: -2 }, reply: function () { return [A('行吧。我等你准备好。快的话三周，慢的话——就说不准了。')]; } }
+        ]
+      },
+      planPrompt: '第一周，你打算怎么过？',
+      plans: ['rest', 'learn', 'hunt']
+    },
+
+    {
+      id: 's_cash_creep', at: 2, months: 2, time: '第 2 个月 · 第一个没有工资条的月底',
+      lines: function (s) {
+        return [
+          S('工资卡没动静。房租照扣，外卖照点，三个订阅默默续了费。'),
+          A('存款还剩多少？你告诉我的数字，和真实数字，一样吗？')
+        ];
+      },
+      tone: {
+        options: [
+          { label: '把截图发给她：就是这个数', trust: 2, effects: { mentality: 1 }, reply: function (s) { return [A('还有 ' + runway(s) + ' 个月。比我见过的很多人强，也比很多人慌。'), A('记着这个数。它是你接下来所有决定的尺子。')]; } },
+          { label: '报了个大概', trust: -1, effects: { mentality: -1 }, reply: function () { return [A('大概。行。反正花光的时候，数字会精确到分。')]; } },
+          { label: '不想谈钱', trust: -3, effects: { mentality: -2 }, reply: function () { return [A('钱不谈，它也会自己找上门。')]; } }
+        ]
+      },
+      planPrompt: '接下来两个月，钱和时间怎么花？',
+      plans: ['hunt', 'gig', 'rest'],
+      extraPlans: [
+        { label: '记账节流，砍掉一切非必需', hint: '这两个月支出压到七折，但日子会很紧', plan: 'rest', effects: { frugalMonths: 2 } }
+      ]
+    },
+
+    {
+      id: 's_dinner', at: 4, months: 1, time: '第 4 个月 · 前同事的饭局',
+      lines: function () {
+        return [
+          S('前同事群里发消息：老地方，周五，来不来？'),
+          A('你裸辞的事，传得比你想象的快。这顿饭你会被问三次「接下来什么打算」。'),
+          A('去不去？')
+        ];
+      },
+      tone: {
+        options: [
+          { label: '去，坐到底', trust: 2, effects: { mentality: 3, offerBuff: { value: 0.05, months: 1 } }, reply: function () { return [S('散场时，一个平时不熟的同事拉住你：「我前东家在招人，要不要推你？」'), A('看到了吗。机会不在招聘软件里，在饭桌上。')]; } },
+          { label: '去，菜上齐就走', trust: 0, effects: { mentality: 1 }, reply: function () { return [A('聪明。饭吃了，问题没答，人也没得罪。')]; } },
+          { label: '不去，编了个理由', trust: -1, effects: { mentality: -2 }, reply: function () { return [A('躲得过饭局，躲不过「他们是不是觉得我混得不好」这个念头。')]; } }
+        ]
+      },
+      planPrompt: '这个月你怎么过？',
+      plans: ['hunt', 'gig', 'rest']
+    },
+
+    {
+      id: 's_gap_question', at: 5, months: 1, time: '第 5 个月',
+      lines: function (s) {
+        if (s.stats.interviews === 0) {
+          return [
+            S('这个月投出去四十七份简历。已读不回，四十六份。'),
+            A('不是你不行。是简历这一关，你已经输在「最近一份工作在四个月前结束」这行字上。'),
+            A('面试没约到，我们改一个打法？')
+          ];
+        }
+        return [
+          S('面试到一半，对方放下笔：「这几个月，你在做什么？」'),
+          A('注意，他不是在问时间，他是在问：这几个月你有没有烂掉。'),
+          A('你打算怎么答？')
+        ];
+      },
+      tone: function (s) {
+        if (s.stats.interviews === 0) {
+          return {
+            options: [
+              { label: '换渠道：先找前同事内推', trust: 2, effects: { comp: 1, offerBuff: { value: 0.08, months: 2 } }, reply: function () { return [A('内推 > 熟人 > 猎头 > 海投。同样的简历，走前门是石沉大海，走后门是「哦，是你啊」。')]; } },
+              { label: '继续海投，加大剂量', trust: -1, effects: { mentality: -2 }, reply: function () { return [A('投得越多越麻木。麻木到第八十份，你会开始怀疑的不是渠道，是自己。')]; } },
+              { label: '先停一停，缓缓', trust: 0, effects: { mentality: 2, comp: -1 }, reply: function () { return [A('缓可以。但简历上的空白不会自己变短。')]; } }
+            ]
+          };
+        }
+        return {
+          options: [
+            { label: '实话，并且有产出可讲', trust: 3, effects: { comp: 2, offerBuff: { value: 0.06, months: 1 } }, reply: function () { return [A('对。空窗不可怕，空窗里什么都没做才可怕。讲产出，别讲心情。')]; } },
+            { label: '说得漂亮，但都是空的', trust: -1, effects: { mentality: -1 }, reply: function () { return [A('面试官听过一百遍「在沉淀自己」。他要的是名词：项目、证书、数字。')]; } },
+            { label: '支支吾吾', trust: -2, effects: { mentality: -3 }, reply: function () { return [A('你支吾的那三秒，比 gap 那四个月更致命。')]; } }
+          ]
+        };
+      },
+      planPrompt: '这个月你怎么过？',
+      plans: ['hunt', 'gig', 'learn']
+    },
+
+    {
+      id: 's_family_call', at: 6, months: 1, time: '第 6 个月 · 家里的电话',
+      lines: function (s) {
+        if (s.setup.family === 'kid') {
+          return [
+            S('孩子举着绘本问你：「别的小朋友爸爸妈妈都上班，你为什么天天在家？」'),
+            A('这个问题，你逃得过今天，逃不过下个月。'),
+            A('你想怎么跟他说？')
+          ];
+        }
+        if (s.setup.family === 'partner') {
+          return [
+            S('伴侣把手机放下：「我们聊聊。你到底打算找到什么时候？」'),
+            A('注意，她问的不是时间，是安全感。'),
+            A('你怎么答？')
+          ];
+        }
+        return [
+          S('妈妈的电话：「最近怎么样啊？工作……还顺利吧？」'),
+          A('她其实知道你辞职了。她在等你自己说。'),
+          A('你怎么答？')
+        ];
+      },
+      tone: {
+        options: [
+          { label: '说实话：难，但我在撑', trust: 2, effects: { mentality: 3 }, reply: function (s) { return [A('说完之后，松了的那口气是真的。'), s.setup.family === 'kid' ? A('孩子没听懂，但他记住了：大人遇到难关，是可以说的。') : A('家里没把你当敌人，就别把家当审讯室。')]; } },
+          { label: '说「快了，放心」', trust: -1, effects: { mentality: -2 }, reply: function () { return [A('「快了」说多了，会变成家里的背景音。你自己也会开始信。')]; } },
+          { label: '岔开话题', trust: -1, effects: { mentality: -1 }, reply: function () { return [A('岔开一次，下次她就不问了。不问，不等于不担心。')]; } }
+        ]
+      },
+      planPrompt: '这个月你怎么过？',
+      plans: ['hunt', 'gig', 'rest']
+    },
+
+    {
+      id: 's_axan_offer', at: 7, months: 2, time: '第 7 个月 · 阿岸的 offer',
+      lines: function () {
+        return [
+          S('阿岸约你在便利店门口。手里两罐咖啡，其中一罐是给你的。'),
+          A('我拿到 offer 了。降薪两成，下周一答复。'),
+          A('……你别这么看我。我想听听你怎么说。')
+        ];
+      },
+      tone: {
+        options: [
+          { label: '接。先上岸，尊严以后再谈', trust: 2, effects: { mentality: 1 }, flags: { axanTook: true }, reply: function () { return [A('行。我听你的。'), S('她拧开咖啡，喝了一口，没再说话。你第一次觉得，被依靠是件很重的事。')]; } },
+          { label: '别接。你不止这个价', trust: 1, effects: { mentality: -1 }, flags: { axanTook: false }, reply: function () { return [A('你说得轻巧。'), A('……但我记住了。')]; } },
+          { label: '我自己都一团糟，别问我', trust: -3, effects: { mentality: -2 }, flags: { axanTook: false }, reply: function () { return [A('嗯。也是。'), S('她把另一罐咖啡放回包里，说本来是想给你的。')]; } }
+        ]
+      },
+      planPrompt: '接下来两个月，你打算怎么过？',
+      plans: ['hunt', 'gig', 'learn']
+    },
+
+    {
+      id: 's_bottom', at: 9, months: 1, time: '第 9 个月 · 账本摊开的那天',
+      lines: function (s) {
+        return [
+          S('阿岸把两张纸摊在桌上，一张是你的账，一张是她的。'),
+          A('按你现在的烧法，还有 ' + runway(s) + ' 个月。我的建议是这个月之内，把「体面」和「坚持」分开算。'),
+          A('要不要降低标准？')
+        ];
+      },
+      tone: {
+        options: [
+          { label: '降薪也接，先活下来', trust: 1, effects: { mentality: 2, offerBuff: { value: 0.1, months: 2 } }, reply: function () { return [A('接。但记住：降薪是暂时的，把「我值多少」和「我现在能拿多少」分开放着。')]; } },
+          { label: '再撑两个月，赌一把', trust: 1, effects: { mentality: -2 }, reply: function () { return [A('赌可以。写个止损线：两个月后还在原地，就按上一条办。')]; } },
+          { label: '开始认真考虑回老家', trust: 2, effects: { mentality: 3 }, flags: { hometownThread: true }, reply: function (s) { return [A('回' + (s.setup.hometownName || '老家') + '不丢人。我有三个客户最后都回去了，两个现在过得比留下的人好。')]; } }
+        ]
+      },
+      planPrompt: '这个月你怎么过？',
+      plans: ['hunt', 'gig', 'rest'],
+      extraPlans: [
+        { label: '回老家待一阵，重新算账', hint: '开支骤降，但节奏会慢下来', plan: 'rest', effects: { mentality: 4, comp: -2, hometownThread: true } }
+      ]
+    },
+
+    {
+      id: 's_gate', at: 10, months: 3, time: '第 10 个月 · 关口',
+      lines: function (s) {
+        return [
+          S('年底了。招聘软件的年终盘点推送，像在提醒你这一年干了什么。'),
+          A('接下来两个月，所有的「以后」都会兑现，或者落空。'),
+          A('最后一程，你想怎么走？')
+        ];
+      },
+      planPrompt: '最后两个月，你怎么过？',
+      plans: ['hunt', 'gig', 'learn', 'rest']
+    }
+  ];
+
+  function epilogue(result, setup, trust, flags) {
+    var key = result.endingKey;
+    var home = setup.hometownName || '老家';
+    var lines = [];
+
+    if (key === 'better' || key === '_return') {
+      lines.push(S('第 13 个月。新工牌，新工位，新的一批「你好，我是新来的」。'));
+      lines.push(key === 'better'
+        ? S('工资涨了 ' + Math.abs(result.salaryChange) + '%。你在心里算：再过十个月，就把 gap 期间的窟窿填平。')
+        : S('工资降了 ' + Math.abs(result.salaryChange) + '%。你安慰自己：至少工资条回来了。'));
+      lines.push(S('第一个月发薪那天，你在工位上打开记账软件。你发现焦虑没有消失，只是从「存款还剩几个月」变成了「这份工作能撑几年」。'));
+      lines.push(flags && flags.axanTook
+        ? S('阿岸也上岸了。她偶尔发来一句「今天又被老板骂了」，你回「恭喜」。')
+        : S('阿岸没接那个 offer。她的朋友圈停更了三个月，最近一条是：开始接陪跑了，第一单免费。'));
+    } else if (key === 'transform') {
+      lines.push(S('第 13 个月。你的店/摊/号，有了第一个回头客。'));
+      lines.push(S('收入还不稳定，但你第一次发现：不用等谁批准，钱也能进账。'));
+      lines.push(S('阿岸说：「你现在最怕的不是没钱，是明年还是这个数。所以——每月记一次账。」'));
+    } else if (key === 'crash') {
+      lines.push(S('第 13 个月。存款见了底，你搬回了' + home + '。'));
+      lines.push(S('邻居问：怎么回来了？你说：回来歇歇。他说：哦，歇歇好。'));
+      lines.push(S('那天晚上你翻了翻裸辞前的聊天记录，最后一条是：「等我以后就好了。」'));
+    } else {
+      lines.push(S('第 13 个月。你还在路上。'));
+      lines.push(S('存款没归零，心态也没归零，但「以后」还没有来。'));
+      lines.push(S('阿岸说：「慢慢来。但别忘了，你已经在第 12 个月的路上了。」'));
+    }
+
+    if (trust != null && trust < 30) {
+      lines.push(S('这一年你几乎没让人帮上忙。这不是坚强，是把自己关起来了。'));
+    }
+    return lines;
+  }
+
+  global.LC = global.LC || {};
+  global.LC.SCENES = SCENES;
+  global.LC.EPILOGUE = epilogue;
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1688,7 +2263,8 @@ b { color: var(--accent-deep); font-weight: 700; }
 
     ctx.fillStyle = '#a2937f';
     ctx.font = '400 28px sans-serif';
-    var rarity = result.personality.composite ? '复合人格 · 比稀有更稀有' : '这一型，在人堆里一眼能认出来';
+    var cityTag = setup && setup.cityName ? setup.cityName + ' · ' : '';
+    var rarity = cityTag + (result.personality.composite ? '复合人格 · 比稀有更稀有' : '这一型，在人堆里一眼能认出来');
     var rarityY = nameY + nameLines + 46;
     ctx.fillText(rarity, 80, rarityY);
 
@@ -1759,13 +2335,13 @@ b { color: var(--accent-deep); font-weight: 700; }
   var doc = global.document;
   var $ = function (id) { return doc.getElementById(id); };
   var Engine = global.LC.Engine;
-  var Narrative = global.LC.Narrative;
+  var Scenes = global.LC.SCENES;
 
   var ui = {
     state: null,
     setup: null,
     result: null,
-    introDone: false,
+    sceneIdx: 0,
     quoteText: ''
   };
 
@@ -1774,6 +2350,8 @@ b { color: var(--accent-deep); font-weight: 700; }
     'in-salary': [3000, 80000, 1000],
     'in-savings': [1000, 500000, 5000]
   };
+
+  var TIER_LABEL = { tier1: '一线', newtier: '新一线', hometown: '老家' };
 
   function showScreen(id) {
     var screens = doc.querySelectorAll('.screen');
@@ -1801,7 +2379,21 @@ b { color: var(--accent-deep); font-weight: 700; }
     return Math.max(b[0], Math.min(b[1], v));
   }
 
+  function cityKnown(name) {
+    var map = (global.LC.CONFIG && global.LC.CONFIG.CITY_TIER) || {};
+    for (var t in map) if (map[t].indexOf(name) >= 0) return true;
+    return false;
+  }
+
+  function cityTier(name) {
+    var map = (global.LC.CONFIG && global.LC.CONFIG.CITY_TIER) || {};
+    for (var t in map) if (map[t].indexOf(name) >= 0) return t;
+    return (global.LC.CONFIG && global.LC.CONFIG.cityFallback) || 'newtier';
+  }
+
   function readSetup() {
+    var cityName = String($('in-city-name').value || '').trim() || '上海';
+    var hometownName = String($('in-hometown').value || '').trim() || '老家县城';
     return {
       age: numVal('in-age'),
       salary: numVal('in-salary'),
@@ -1809,7 +2401,9 @@ b { color: var(--accent-deep); font-weight: 700; }
       gender: segValue('seg-gender') || 'secret',
       housing: segValue('seg-housing'),
       family: segValue('seg-family'),
-      city: segValue('seg-city')
+      city: cityTier(cityName),
+      cityName: cityName,
+      hometownName: hometownName
     };
   }
 
@@ -1817,10 +2411,11 @@ b { color: var(--accent-deep); font-weight: 700; }
     $('in-age').value = s.age;
     $('in-salary').value = s.salary;
     $('in-savings').value = s.savings;
-    setSeg('seg-gender', s.gender);
+    setSeg('seg-gender', s.gender || 'secret');
     setSeg('seg-housing', s.housing);
     setSeg('seg-family', s.family);
-    setSeg('seg-city', s.city);
+    $('in-city-name').value = s.cityName || '上海';
+    $('in-hometown').value = s.hometownName || '老家县城';
     previewBurn();
   }
 
@@ -1835,6 +2430,16 @@ b { color: var(--accent-deep); font-weight: 700; }
     var burn = Engine.burnRate(tmp);
     var months = burn > 0 ? Math.floor(s.savings / burn) : 99;
     $('savings-hint').textContent = '约 ' + months + ' 个月刚性支出';
+    var known = cityKnown(s.cityName);
+    $('city-tier-hint').textContent = s.cityName + ' · 按' + TIER_LABEL[s.city] + '物价估算' + (known ? '' : '（没认出这个城市，先这么算）');
+
+    var homeBurn = Engine.burnRate({
+      setup: { city: 'hometown', housing: 'none', family: s.family, salary: s.salary },
+      burnMods: [], frugalMonths: 0
+    });
+    $('hometown-hint').textContent = '回' + s.hometownName + '住家里：月支出约 ' + homeBurn.toLocaleString() +
+      '，比现在每月省 ' + Math.max(0, burn - homeBurn).toLocaleString() + ' 元';
+
     $('burn-preview').innerHTML =
       '每月固定支出约 <b>' + burn.toLocaleString() + ' 元</b>，你的存款能撑 <b>' +
       Math.min(months, 99) + ' 个月</b>（一分钱进项都没有的前提下）。';
@@ -1873,7 +2478,7 @@ b { color: var(--accent-deep); font-weight: 700; }
   }
 
   function bindSegments() {
-    ['seg-gender', 'seg-housing', 'seg-family', 'seg-city'].forEach(function (segId) {
+    ['seg-gender', 'seg-housing', 'seg-family'].forEach(function (segId) {
       var btns = doc.querySelectorAll('#' + segId + ' .seg-btn');
       for (var i = 0; i < btns.length; i++) {
         btns[i].addEventListener('click', function () {
@@ -1882,11 +2487,17 @@ b { color: var(--accent-deep); font-weight: 700; }
         });
       }
     });
+    $('in-city-name').addEventListener('input', previewBurn);
+    $('in-hometown').addEventListener('input', previewBurn);
   }
 
   function randomSetup() {
     var r = function (min, max, step) { return min + Math.round(Math.random() * (max - min) / step) * step; };
     var pick = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+    var pickCity = function () {
+      var m = global.LC.CONFIG.CITY_TIER;
+      return pick(m[pick(['tier1', 'newtier'])]);
+    };
     writeSetup({
       age: r(22, 40, 1),
       salary: r(5, 45, 1) * 1000,
@@ -1894,14 +2505,14 @@ b { color: var(--accent-deep); font-weight: 700; }
       gender: pick(['female', 'male', 'female', 'male', 'secret']),
       housing: pick(['none', 'rent', 'rent', 'mortgage']),
       family: pick(['single', 'single', 'partner', 'kid']),
-      city: pick(['tier1', 'newtier', 'hometown'])
+      cityName: pickCity(),
+      hometownName: pick(['老家县城', '菏泽', '周口', '绵阳', '赣州', '保定'])
     });
   }
 
   function bindSetup() {
     bindNumberInputs();
     bindSegments();
-    $('btn-random').addEventListener('click', randomSetup);
     $('btn-reroll-inherit').addEventListener('click', randomSetup);
     $('btn-start').addEventListener('click', startGame);
     previewBurn();
@@ -1917,6 +2528,7 @@ b { color: var(--accent-deep); font-weight: 700; }
       return Math.max(min, Math.min(max, n));
     };
     var oneOf = function (v, list, dft) { return list.indexOf(v) >= 0 ? v : dft; };
+    var cityName = String(q.cn || '').trim() || '上海';
     writeSetup({
       age: num(q.age, 22, 40, 28),
       salary: num(q.salary, 3000, 80000, 15000),
@@ -1924,7 +2536,8 @@ b { color: var(--accent-deep); font-weight: 700; }
       gender: oneOf(q.gender, ['female', 'male', 'secret'], 'secret'),
       housing: oneOf(q.housing, ['none', 'rent', 'mortgage'], 'rent'),
       family: oneOf(q.family, ['single', 'partner', 'kid'], 'single'),
-      city: oneOf(q.city, ['tier1', 'newtier', 'hometown'], 'tier1')
+      cityName: cityName,
+      hometownName: String(q.hm || '').trim() || '老家县城'
     });
     $('share-banner').classList.remove('hidden');
     $('share-banner-text').textContent = '朋友把他的人设扔给了你：同一起点，不同人生。';
@@ -1934,14 +2547,66 @@ b { color: var(--accent-deep); font-weight: 700; }
     var setup = readSetup();
     ui.setup = setup;
     ui.state = Engine.create(setup);
-    ui.introDone = false;
+    ui.sceneIdx = 0;
+    $('chat').innerHTML = '';
     showScreen('screen-game');
-    showIntro();
+    nextScene();
+  }
+
+  // ================= 对话流 =================
+
+  function scrollChat() {
+    var box = $('chat');
+    if (box && box.lastChild) box.lastChild.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }
+
+  function pushBubble(item) {
+    var box = $('chat');
+    var d = doc.createElement('div');
+    if (item.t === 'sys') {
+      d.className = 'msg sys';
+      d.textContent = item.text;
+    } else if (item.t === 'me') {
+      d.className = 'msg me';
+      var mb = doc.createElement('div');
+      mb.className = 'bubble';
+      mb.textContent = item.text;
+      d.appendChild(mb);
+    } else {
+      d.className = 'msg axan';
+      var who = doc.createElement('div');
+      who.className = 'who';
+      who.textContent = '阿岸';
+      var b = doc.createElement('div');
+      b.className = 'bubble';
+      b.textContent = item.text;
+      d.appendChild(who); d.appendChild(b);
+    }
+    box.appendChild(d);
+    scrollChat();
+  }
+
+  function pushNotebook(lines) {
+    if (!lines || !lines.length) return;
+    var box = doc.createElement('div');
+    box.className = 'notebook';
+    var head = doc.createElement('div');
+    head.className = 'notebook-head';
+    head.textContent = '阿岸的账本';
+    box.appendChild(head);
+    lines.forEach(function (t) {
+      var d = doc.createElement('div');
+      d.textContent = '· ' + t;
+      box.appendChild(d);
+    });
+    $('chat').appendChild(box);
+    scrollChat();
   }
 
   function renderStatus() {
     var s = ui.state;
-    $('month-tag').textContent = s.month === 0 ? '开局' : '第 ' + s.month + ' / ' + s.MONTHS + ' 个月';
+    var scene = Scenes[ui.sceneIdx];
+    $('node-tag').textContent = scene ? scene.time : '尾声';
     var tag = $('cash-tag');
     tag.textContent = '存款 ' + fmtWan(s.cash);
     tag.classList.toggle('danger', s.cash < 0);
@@ -1951,58 +2616,55 @@ b { color: var(--accent-deep); font-weight: 700; }
     mb.className = 'bar-fill mentality ' + (s.mentality < 30 ? 'danger' : s.mentality < 50 ? 'warn' : '');
     $('out-comp').textContent = s.comp;
     $('bar-comp').style.width = s.comp + '%';
-    renderDots('progress-dots', s.month - 1);
+    renderDots('progress-dots', Math.min(ui.sceneIdx, Scenes.length));
+    renderBuffs();
   }
 
   function renderDots(containerId, doneCount) {
     var box = $(containerId);
     if (!box) return;
     box.innerHTML = '';
-    for (var i = 0; i < ui.state.MONTHS; i++) {
+    for (var i = 0; i < Scenes.length; i++) {
       var d = doc.createElement('div');
       d.className = 'pdot' + (i < doneCount ? ' done' : '');
       box.appendChild(d);
     }
   }
 
-  function showIntro() {
-    renderStatus();
-    $('event-cat').className = 'event-cat';
-    $('event-cat').textContent = '开场';
-    $('event-title').textContent = '';
-    $('event-text').textContent = Narrative.makeOpening(ui.setup);
-    $('choice-area').innerHTML = '';
-    var btn = mkBtn('开始这一年 →', 'btn primary wide');
-    btn.addEventListener('click', function () {
-      ui.introDone = true;
-      beginMonth();
-    });
-    $('choice-area').appendChild(btn);
-  }
-
-  function beginMonth() {
+  function renderBuffs() {
     var s = ui.state;
-    var ev = Engine.startMonth(s);
-    renderStatus();
-    var catEl = $('event-cat');
-    if (ev) {
-      catEl.className = 'event-cat cat-' + ev.cat;
-      catEl.textContent = catName(ev.cat);
-      $('event-title').textContent = ev.title;
-      $('event-text').textContent = ev.text;
-      if (ev.choice) renderEventChoices(ev);
-      else renderPlanChoices();
-    } else {
-      catEl.className = 'event-cat';
-      catEl.textContent = '平常的一天';
-      $('event-title').textContent = '这个月没什么大事';
-      $('event-text').textContent = '日子像温水，不烫也不凉。时间往前走，你得决定怎么用。';
-      renderPlanChoices();
-    }
+    var box = $('buff-chips');
+    if (!box) return;
+    var chips = ['阿岸信任 ' + s.trust];
+    (s.offerBuff || []).forEach(function (b) {
+      chips.push('求职好运 · 剩 ' + b.months + ' 月');
+    });
+    if (s.pendingBet) chips.push('押注在桌上 · ' + fmtWan(s.pendingBet.stake));
+    if (s.freeIncomeRate > 0) chips.push('副业现金流 ' + Math.round(s.freeIncomeRate * 100) + '%');
+    box.innerHTML = '';
+    chips.forEach(function (t) {
+      var c = doc.createElement('span');
+      c.className = 'buff-chip';
+      c.textContent = t;
+      box.appendChild(c);
+    });
   }
 
-  function catName(cat) {
-    return { job: '求职', gig: '搞钱', boom: '风口', family: '家庭', accident: '意外', social: '社交' }[cat] || '生活';
+  function planDesc(pid, s) {
+    var C = global.LC.CONFIG;
+    if (pid === 'hunt') {
+      return s.month < 3
+        ? '趁 gap 还新鲜：头三个月是 HR 最愿意约面试的窗口'
+        : 'gap 越长，简历越要靠「这期间做了什么」撑着';
+    }
+    if (pid === 'gig') {
+      var amt = Math.round(s.setup.salary * C.gig.incomeRate / 100) * 100;
+      return '接点零活，每月回血约 ' + amt.toLocaleString() + ' 元，竞争力 -1';
+    }
+    if (pid === 'learn') {
+      return '报班/自学，花 ' + C.learn.cost + ' 元，竞争力 +4——短期疼，长期值';
+    }
+    return '彻底休整，心态回升；越休越麻，竞争力 -3';
   }
 
   function mkBtn(label, cls) {
@@ -2012,138 +2674,182 @@ b { color: var(--accent-deep); font-weight: 700; }
     return b;
   }
 
-  function renderEventChoices(ev) {
+  function applyTone(opt) {
+    var s = ui.state;
+    if (typeof opt.trust === 'number') s.trust = Math.max(0, Math.min(100, s.trust + opt.trust));
+    if (opt.effects) Engine._internal.applyEffects(s, opt.effects);
+    if (opt.flags) for (var k in opt.flags) s.flags[k] = opt.flags[k];
+    pushBubble({ t: 'me', text: opt.label });
+    renderStatus();
+  }
+
+  function nextScene() {
+    var s = ui.state;
+    if (s.ended) { showEnd(); return; }
+    var scene = Scenes[ui.sceneIdx];
+    if (!scene) { showEnd(); return; }
+    renderStatus();
+    var lines = typeof scene.lines === 'function' ? scene.lines(s) : (scene.lines || []);
+    lines.forEach(pushBubble);
+    if (scene.tone) renderTone(scene);
+    else renderPlans(scene);
+  }
+
+  function renderTone(scene) {
+    var s = ui.state;
+    var tone = typeof scene.tone === 'function' ? scene.tone(s) : scene.tone;
+    if (!tone) { renderPlans(scene); return; }
     var area = $('choice-area');
     area.innerHTML = '';
-    ev.choice.options.forEach(function (opt, i) {
+    var head = doc.createElement('div');
+    head.className = 'plan-head';
+    head.textContent = '你会怎么答？';
+    area.appendChild(head);
+    tone.options.forEach(function (opt) {
       var wrap = doc.createElement('div');
       wrap.className = 'choice';
       var b = mkBtn(opt.label, 'btn soft wide');
       b.style.textAlign = 'left';
       wrap.appendChild(b);
-      if (opt.note) {
-        var note = doc.createElement('div');
-        note.className = 'choice-note';
-        note.textContent = opt.note;
-        wrap.appendChild(note);
-      }
       b.addEventListener('click', function () {
-        var r = Engine.resolveEvent(ui.state, i);
-        if (r && r.ended) { showEnd(); return; }
-        renderPlanChoices();
+        applyTone(opt);
+        var reply = typeof opt.reply === 'function' ? opt.reply(s) : (opt.reply || []);
+        reply.forEach(pushBubble);
+        renderPlans(scene);
       });
       area.appendChild(wrap);
     });
+    scrollChat();
   }
 
-  function renderPlanChoices() {
+  function renderPlans(scene) {
     var s = ui.state;
-    if (!Engine.toPlan(s)) return;
     var area = $('choice-area');
     area.innerHTML = '';
+    var prompt = typeof scene.planPrompt === 'function' ? scene.planPrompt(s) : (scene.planPrompt || '这一个月，你打算怎么过？');
     var head = doc.createElement('div');
     head.className = 'plan-head';
-    head.textContent = '· 这个月，你主要干什么 ·';
+    head.textContent = prompt;
     area.appendChild(head);
-    Object.keys(Engine.PLANS).forEach(function (pid) {
-      var p = Engine.PLANS[pid];
+
+    var options = [];
+    (scene.plans || ['hunt', 'gig', 'learn', 'rest']).forEach(function (pid) {
+      options.push({ plan: pid, label: Engine.PLANS[pid].label, hint: planDesc(pid, s) });
+    });
+    (scene.extraPlans || []).forEach(function (x) { options.push(x); });
+
+    options.forEach(function (o) {
       var wrap = doc.createElement('div');
       wrap.className = 'choice';
-      var b = mkBtn(p.label, 'btn soft wide');
+      var b = mkBtn(o.label, 'btn soft wide');
       b.style.textAlign = 'left';
       var note = doc.createElement('div');
       note.className = 'choice-note';
-      note.textContent = p.desc;
+      note.textContent = o.hint || planDesc(o.plan, s);
       wrap.appendChild(b); wrap.appendChild(note);
-      b.addEventListener('click', function () { doPlan(pid); });
+      b.addEventListener('click', function () {
+        pushBubble({ t: 'me', text: '（这个月：' + o.label + '）' });
+        if (o.effects) Engine._internal.applyEffects(s, o.effects);
+        advance(scene.months || 1, o.plan);
+      });
       area.appendChild(wrap);
     });
+    scrollChat();
   }
 
-  function doPlan(pid) {
-    var report = Engine.choosePlan(ui.state, pid);
-    showReport(report);
-  }
-
-  function showReport(report) {
-    showScreen('screen-report');
-    $('report-month-tag').textContent = '第 ' + report.month + ' / ' + ui.state.MONTHS + ' 个月 · 月报';
-    renderDots('report-progress-dots', report.month);
-    $('report-title').textContent = '「' + (Engine.PLANS[report.plan] ? Engine.PLANS[report.plan].label : '突发事件') + '」的一个月';
-    var lines = $('report-lines');
-    lines.innerHTML = '';
-    report.lines.forEach(function (t) {
-      var d = doc.createElement('div');
-      d.className = 'report-line';
-      d.textContent = t;
-      lines.appendChild(d);
-    });
+  function advance(remaining, planId) {
     var s = ui.state;
-    $('report-status').innerHTML =
-      '存款 <b>' + fmtWan(s.cash) + '</b> ・ 心态 <b>' + s.mentality + '</b> ・ 竞争力 <b>' + s.comp + '</b>' +
-      (s.pendingBet ? '<br>一笔押注在桌上（' + fmtWan(s.pendingBet.stake) + '），下个月开奖' : '');
-
-    var nextArea = $('btn-next-month');
-    nextArea.style.display = report.offer ? 'none' : '';
-    nextArea.textContent = report.ended ? '看看这一年 →' : '下个月 →';
-
-    if (report.offer) {
-      var q = doc.createElement('div');
-      q.className = 'offer-box';
-      q.textContent = 'offer：' + report.offer.toLocaleString() + ' 元/月（原工资的 ' + Math.round(report.offer / ui.setup.salary * 100) + '%）';
-      lines.appendChild(q);
-      var row = doc.createElement('div');
-      row.className = 'offer-actions';
-      var acc = mkBtn('接了，先上岸', 'btn primary');
-      var rej = mkBtn('拒绝，再等等', 'btn soft');
-      acc.addEventListener('click', function () {
-        Engine.acceptOffer(ui.state);
-        showEnd();
-      });
-      rej.addEventListener('click', function () {
-        Engine.rejectOffer(ui.state);
-        nextArea.style.display = '';
-        q.remove(); row.remove();
-        alertMsg('拒了。心态 -4，你赌后面有更好的。');
-      });
-      row.appendChild(acc); row.appendChild(rej);
-      lines.appendChild(row);
+    $('choice-area').innerHTML = '';
+    for (var i = 0; i < remaining; i++) {
+      var rep = Engine.planMonth(s, planId);
+      if (rep && rep.lines) pushNotebook(rep.lines);
+      renderStatus();
+      if (s.ended) break;
+      if (rep && rep.offer) { pendingOffer(rep.offer, remaining - i - 1, planId); return; }
     }
+    if (s.ended) { showEnd(); return; }
+    ui.sceneIdx++;
+    nextScene();
   }
 
-  function alertMsg(t) {
-    var d = doc.createElement('div');
-    d.className = 'toast';
-    d.textContent = t;
-    doc.body.appendChild(d);
-    setTimeout(function () { d.remove(); }, 2400);
+  function pendingOffer(amount, remaining, planId) {
+    var s = ui.state;
+    var area = $('choice-area');
+    area.innerHTML = '';
+    var pct = Math.round(amount / ui.setup.salary * 100);
+    pushBubble({ t: 'sys', text: '一个 offer：' + amount.toLocaleString() + ' 元/月（你原工资的 ' + pct + '%）。' });
+    pushBubble({ t: 'axan', text: '接不接？我先不问你的理想，只问一句：存款还够撑几个月？' });
+
+    var row = doc.createElement('div');
+    row.className = 'offer-actions';
+    var acc = mkBtn('接了，先上岸', 'btn primary');
+    var rej = mkBtn('拒绝，再等等', 'btn soft');
+    acc.addEventListener('click', function () {
+      Engine.acceptOffer(ui.state);
+      showEnd();
+    });
+    rej.addEventListener('click', function () {
+      Engine.rejectOffer(ui.state);
+      pushBubble({ t: 'me', text: '（拒绝了这个 offer）' });
+      pushBubble({ t: 'sys', text: '心态 -4。你把手机扣在桌上，告诉自己后面还有更好的。' });
+      renderStatus();
+      advance(remaining, planId);
+    });
+    row.appendChild(acc); row.appendChild(rej);
+    area.appendChild(row);
+    scrollChat();
   }
 
-  $('btn-next-month').addEventListener('click', function () {
-    if (ui.state.ended) { showEnd(); return; }
-    showScreen('screen-game');
-    beginMonth();
-  });
+  // ================= 结局 =================
 
   function showEnd() {
     var s = ui.state;
     var result = Engine.finish(s);
     ui.result = result;
     showScreen('screen-end');
+
     $('end-line').textContent = '结局 · ' + result.line;
     $('end-title').textContent = result.title;
     $('end-text').textContent = result.text;
 
-    var mg = $('montage');
-    mg.innerHTML = '';
-    if (result.stats.months < s.MONTHS) {
-      Narrative.makeMontage(result, { months: s.MONTHS }).forEach(function (t) {
-        var d = doc.createElement('div');
-        d.className = 'montage-line';
-        d.textContent = t;
-        mg.appendChild(d);
-      });
-    }
+    var epi = $('epilogue');
+    epi.innerHTML = '';
+    var epiHead = doc.createElement('div');
+    epiHead.className = 'epi-head';
+    epiHead.textContent = '第 13 个月';
+    epi.appendChild(epiHead);
+    global.LC.EPILOGUE(result, ui.setup, result.stats.trust, { axanTook: result.axanTook }).forEach(function (item) {
+      var d = doc.createElement('p');
+      d.textContent = item.text;
+      epi.appendChild(d);
+    });
+
+    var adv = global.LC.Advice.analyze(result, ui.setup);
+    var LV = { '高': 'hi', '中': 'mid', '低': 'lo' };
+    var rl = $('risk-list');
+    rl.innerHTML = '';
+    adv.risks.forEach(function (r) {
+      var row = doc.createElement('div');
+      row.className = 'risk-row';
+      var nm = doc.createElement('span');
+      nm.className = 'risk-name';
+      nm.textContent = r.label;
+      var lv = doc.createElement('span');
+      lv.className = 'risk-level lv-' + (LV[r.level] || 'lo');
+      lv.textContent = r.level;
+      var dt = doc.createElement('span');
+      dt.className = 'risk-detail';
+      dt.textContent = r.detail;
+      row.appendChild(nm); row.appendChild(lv); row.appendChild(dt);
+      rl.appendChild(row);
+    });
+    var al = $('advice-list');
+    al.innerHTML = '';
+    adv.advice.forEach(function (t) {
+      var li = doc.createElement('li');
+      li.textContent = t;
+      al.appendChild(li);
+    });
 
     $('p-name').textContent = result.personalityName;
     $('p-roast').textContent = '「' + result.roast + '」';
@@ -2157,7 +2863,7 @@ b { color: var(--accent-deep); font-weight: 700; }
       result.stats.regret + '</b><br>' + salary;
 
     $('end-quote').textContent = '“' + (ui.quoteText || '后悔是裸辞的售后服务，每人一份，无法退货。') + '”';
-    Narrative.endingQuote(result).then(function (q) {
+    global.LC.Narrative.endingQuote(result).then(function (q) {
       ui.quoteText = q;
       $('end-quote').textContent = '“' + q + '”';
     });
@@ -2168,8 +2874,7 @@ b { color: var(--accent-deep); font-weight: 700; }
   $('btn-card').addEventListener('click', function () {
     var result = ui.result;
     result.quote = ui.quoteText || '后悔是裸辞的售后服务，每人一份，无法退货。';
-    var canvas = $('card-canvas');
-    var dataUrl = global.LC.Card.render(canvas, result, ui.setup);
+    var dataUrl = global.LC.Card.render($('card-canvas'), result, ui.setup);
     $('card-download').href = dataUrl;
     $('card-area').classList.remove('hidden');
     $('card-area').scrollIntoView({ behavior: 'smooth' });
@@ -2183,7 +2888,9 @@ b { color: var(--accent-deep); font-weight: 700; }
     var s = ui.setup;
     var base = global.location.href.split('?')[0].split('#')[0];
     var url = base + '?age=' + s.age + '&salary=' + s.salary + '&savings=' + s.savings +
-      '&gender=' + s.gender + '&housing=' + s.housing + '&family=' + s.family + '&city=' + s.city;
+      '&gender=' + s.gender + '&housing=' + s.housing + '&family=' + s.family +
+      '&city=' + s.city + '&cn=' + encodeURIComponent(s.cityName || '上海') +
+      '&hm=' + encodeURIComponent(s.hometownName || '老家县城');
     var fallback = function () {
       var ta = doc.createElement('textarea');
       ta.value = url; doc.body.appendChild(ta); ta.select();
@@ -2196,6 +2903,14 @@ b { color: var(--accent-deep); font-weight: 700; }
       }, fallback);
     } else fallback();
   });
+
+  function alertMsg(t) {
+    var d = doc.createElement('div');
+    d.className = 'toast';
+    d.textContent = t;
+    doc.body.appendChild(d);
+    setTimeout(function () { d.remove(); }, 2400);
+  }
 
   global.LC.UI = ui;
   bindSetup();
