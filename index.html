@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>裸辞模拟器 · 替你活一遍辞职后的那一年</title>
+<meta name="description" content="用 10 分钟，替你活一遍裸辞之后的那一年。测测你的裸辞人格。">
+<style>
+:root {
+  --bg: #fdf8f1;
+  --bg-soft: #f7ede0;
+  --card: #ffffff;
+  --ink: #33281f;
+  --ink-soft: #6b5b4d;
+  --muted: #a2937f;
+  --line: #efe3d3;
+  --accent: #f2762e;
+  --accent-deep: #d95f1f;
+  --accent-soft: #ffe9d6;
+  --pink: #ffd9de;
+  --green: #5aa96a;
+  --red: #dd5b4b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background:
+    radial-gradient(1200px 500px at 50% -10%, #ffe9d2 0%, rgba(255,233,210,0) 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  line-height: 1.65;
+  min-height: 100%;
+}
+
+#app { max-width: 520px; margin: 0 auto; padding: 22px 18px 56px; }
+
+.screen { display: none; animation: fadein .4s ease; }
+.screen.active { display: block; }
+@keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.hidden { display: none !important; }
+
+b { color: var(--accent-deep); font-weight: 700; }
+
+/* ---------- 通用按钮 ---------- */
+.btn {
+  display: inline-block; width: 100%;
+  padding: 15px 18px; border-radius: 18px;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  border: none; font-family: inherit;
+  transition: transform .1s ease, box-shadow .1s ease;
+  letter-spacing: .5px;
+}
+.btn:active { transform: translateY(3px); }
+.btn.primary {
+  background: linear-gradient(180deg, #ff9448, var(--accent));
+  color: #fff; box-shadow: 0 5px 0 var(--accent-deep);
+}
+.btn.primary:active { box-shadow: 0 2px 0 var(--accent-deep); }
+.btn.soft {
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--line);
+  box-shadow: 0 4px 0 #ecdfcd;
+}
+.btn.soft:active { box-shadow: 0 1px 0 #ecdfcd; }
+.btn.ghost { background: transparent; border: 1.5px dashed var(--line); color: var(--ink-soft); }
+.btn.wide { width: 100%; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.btn + .btn { margin-top: 12px; }
+
+.link-btn {
+  background: none; border: none; color: var(--accent-deep);
+  font-size: 13px; cursor: pointer; text-decoration: underline;
+  padding: 4px 0; font-family: inherit; font-weight: 600;
+}
+
+/* ---------- 开局设定 ---------- */
+.setup-hero { text-align: center; padding: 18px 0 22px; }
+.hero-pill {
+  display: inline-block; font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; color: var(--accent-deep);
+  background: var(--accent-soft); border-radius: 999px;
+  padding: 5px 16px; margin-bottom: 16px;
+}
+.setup-hero h1 {
+  font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  font-size: 40px; font-weight: 800; letter-spacing: 3px;
+  line-height: 1.25;
+}
+.tagline {
+  margin-top: 12px; color: var(--ink-soft); font-size: 14px; line-height: 1.8;
+}
+
+.form-card {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 24px;
+  padding: 8px 20px;
+  box-shadow: 0 10px 30px rgba(210, 170, 120, 0.12);
+}
+
+.field { padding: 16px 0; border-bottom: 1px dashed var(--line); }
+.field:last-child { border-bottom: none; }
+.field label {
+  display: block; font-size: 15px; font-weight: 700;
+  color: var(--ink); margin-bottom: 10px; letter-spacing: 1px;
+}
+
+.num-row { display: flex; align-items: center; gap: 10px; }
+.num-row input[type=number] {
+  flex: 1; min-width: 0;
+  font-size: 24px; font-weight: 800; color: var(--ink);
+  background: var(--bg-soft); border: 1.5px solid transparent;
+  border-radius: 14px; padding: 10px 14px; text-align: center;
+  font-family: inherit; outline: none;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.num-row input[type=number]::-webkit-outer-spin-button,
+.num-row input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num-row input[type=number]:focus { border-color: var(--accent); background: #fff; }
+.unit { color: var(--muted); font-size: 14px; width: 20px; }
+.step-btn {
+  width: 44px; height: 44px; border-radius: 14px; flex: 0 0 44px;
+  background: var(--card); border: 1.5px solid var(--line);
+  color: var(--ink); font-size: 22px; font-weight: 700; cursor: pointer;
+  line-height: 1; font-family: inherit;
+}
+.step-btn:active { background: var(--accent-soft); transform: scale(.96); }
+
+.field-hint { margin-top: 8px; font-size: 12px; color: var(--muted); text-align: right; }
+
+.seg { display: flex; gap: 8px; }
+.seg-btn {
+  flex: 1; padding: 11px 0; border-radius: 14px;
+  background: var(--bg-soft); border: 1.5px solid transparent;
+  color: var(--ink-soft); font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: all .15s ease;
+}
+.seg-btn.selected {
+  background: var(--ink); color: #fff; font-weight: 700;
+  box-shadow: 0 3px 0 #1e1712;
+}
+
+.preview {
+  margin: 16px 0 0; padding: 16px 18px;
+  background: linear-gradient(135deg, #fff1e2, #ffe4e4);
+  border-radius: 18px; color: var(--ink-soft); font-size: 14px;
+  line-height: 1.9;
+}
+
+.setup-actions { margin-top: 18px; display: flex; gap: 10px; }
+.setup-actions .btn { flex: 1; }
+.setup-actions .btn + .btn { margin-top: 0; }
+.setup-footnote { text-align: center; color: var(--muted); font-size: 12px; margin-top: 14px; }
+
+.share-banner {
+  margin-bottom: 14px; padding: 12px 16px;
+  background: var(--pink); border-radius: 14px;
+  font-size: 13px; color: var(--ink-soft);
+}
+.share-banner span { display: block; margin-bottom: 4px; }
+
+/* ---------- 月度推演 ---------- */
+.game-header { padding: 4px 0 16px; }
+.month-row { display: flex; justify-content: space-between; align-items: baseline; }
+.month-label { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 1px; }
+.cash-tag { font-size: 22px; font-weight: 800; color: var(--ink); }
+.cash-tag.danger { color: var(--red); }
+
+.progress-dots { display: flex; gap: 5px; margin-top: 10px; }
+.pdot { flex: 1; height: 5px; border-radius: 3px; background: #eddcc8; }
+.pdot.done { background: var(--accent); }
+
+.status-panels {
+  display: flex; gap: 12px; margin-bottom: 20px;
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 18px; padding: 14px 16px;
+}
+.stat { flex: 1; }
+.stat-label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600;
+}
+.stat-label output { color: var(--ink); font-weight: 800; font-size: 15px; }
+.bar { height: 8px; border-radius: 4px; background: var(--bg-soft); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .45s ease; }
+.bar-fill.mentality { background: linear-gradient(90deg, #ff9d78, var(--accent)); }
+.bar-fill.mentality.warn { background: #e9a53c; }
+.bar-fill.mentality.danger { background: var(--red); }
+.bar-fill.comp { background: linear-gradient(90deg, #8cc7a1, var(--green)); }
+
+.event-card {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 22px; padding: 24px 22px; margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(210, 170, 120, 0.1);
+}
+.event-cat {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  padding: 3px 12px; border-radius: 999px; margin-bottom: 12px;
+  background: var(--bg-soft); color: var(--ink-soft);
+}
+.event-cat.cat-job { background: #e3edff; color: #3f63a8; }
+.event-cat.cat-gig { background: #e6f5e4; color: #3f7d46; }
+.event-cat.cat-boom { background: #ffedd9; color: #b5661b; }
+.event-cat.cat-family { background: #ffe6ea; color: #ab4a5d; }
+.event-cat.cat-accident { background: #f1e8ff; color: #6b4fa4; }
+.event-cat.cat-social { background: #e2f4f6; color: #35727c; }
+.event-card h3 { font-size: 21px; font-weight: 800; margin-bottom: 10px; line-height: 1.4; }
+.event-card p { font-size: 15px; color: var(--ink-soft); }
+
+.choice { margin-bottom: 12px; }
+.choice .btn { text-align: left; padding: 16px 18px; border-radius: 16px; }
+.choice-note { font-size: 12px; color: var(--muted); margin-top: 6px; padding-left: 6px; }
+.plan-head {
+  font-size: 14px; color: var(--ink-soft); text-align: center;
+  margin: 6px 0 14px; font-weight: 700; letter-spacing: 1px;
+}
+
+/* ---------- 月度报告 ---------- */
+.report-card {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 22px; padding: 24px 22px; margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(210, 170, 120, 0.1);
+}
+.report-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+.report-line {
+  font-size: 14px; color: var(--ink-soft);
+  padding: 7px 0 7px 16px; position: relative;
+  border-bottom: 1px dashed var(--line);
+}
+.report-line:last-child { border-bottom: none; }
+.report-line::before {
+  content: ""; position: absolute; left: 2px; top: 14px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+.report-status {
+  margin-top: 14px; padding: 12px 14px; border-radius: 14px;
+  background: var(--bg-soft);
+  font-size: 13px; color: var(--ink-soft);
+}
+.offer-box {
+  margin-top: 14px; padding: 14px 16px; border-radius: 14px;
+  background: #e6f5e4; border: 1.5px solid #bfe3bd;
+  color: #2f6b37; font-weight: 800; font-size: 15px;
+}
+.offer-actions { display: flex; gap: 10px; margin-top: 12px; }
+.offer-actions .btn { width: auto; flex: 1; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%);
+  background: var(--ink); color: #fff;
+  padding: 11px 24px; border-radius: 999px;
+  font-size: 14px; font-weight: 600; z-index: 99;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  animation: fadein .25s ease; max-width: 86vw; text-align: center;
+}
+
+/* ---------- 结局 ---------- */
+.end-hero {
+  text-align: center; padding: 30px 22px 26px; margin-bottom: 16px;
+  background: linear-gradient(160deg, #ffedd9, #ffe3e6 60%, #fff3e6);
+  border-radius: 26px; border: 1.5px solid #ffe0cd;
+}
+.end-line {
+  display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 3px;
+  color: var(--accent-deep); background: rgba(255,255,255,.7);
+  padding: 4px 16px; border-radius: 999px; margin-bottom: 14px;
+}
+.end-hero h2 {
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  font-size: 26px; font-weight: 800; line-height: 1.45;
+}
+.end-hero p { margin-top: 14px; font-size: 14px; color: var(--ink-soft); text-align: left; }
+
+.montage { margin: 0 0 16px; }
+.montage-line {
+  font-size: 13px; color: var(--muted);
+  padding: 5px 0 5px 16px; position: relative;
+}
+.montage-line::before {
+  content: ""; position: absolute; left: 2px; top: 13px;
+  width: 5px; height: 5px; border-radius: 50%; background: #d9c6b0;
+}
+
+.personality-box {
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 24px; padding: 26px 22px; text-align: center; margin-bottom: 16px;
+  box-shadow: 0 10px 30px rgba(242, 118, 46, 0.15);
+  position: relative; overflow: hidden;
+}
+.personality-box::before {
+  content: ""; position: absolute; top: -60px; right: -60px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: var(--accent-soft); opacity: .7;
+}
+.p-label { font-size: 12px; font-weight: 800; letter-spacing: 4px; color: var(--accent-deep); margin-bottom: 10px; }
+.p-name {
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  font-size: 32px; font-weight: 800; line-height: 1.35;
+}
+.p-roast { margin-top: 12px; font-size: 14px; color: var(--ink-soft); }
+.p-rarity { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+.end-stats {
+  text-align: center; font-size: 14px; color: var(--ink-soft);
+  margin-bottom: 10px; line-height: 2.1;
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 18px; padding: 14px 12px;
+}
+.end-quote {
+  text-align: center; font-size: 15px; color: var(--ink);
+  padding: 18px 8px; margin-bottom: 10px; font-weight: 600;
+}
+.end-quote::before { content: "“ "; color: var(--accent); }
+
+.end-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.end-actions .btn { flex: 1 1 46%; }
+.end-actions .btn + .btn { margin-top: 0; }
+
+.card-area { margin-top: 22px; text-align: center; }
+#card-canvas { width: 100%; max-width: 340px; height: auto; border-radius: 16px; box-shadow: 0 8px 28px rgba(150,110,70,.18); }
+.card-area .btn { max-width: 340px; margin-top: 14px; }
+.card-tip { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+.paywall {
+  margin-top: 30px; padding: 20px 18px; text-align: center;
+  border: 1.5px dashed #e8d5bd; border-radius: 20px;
+  background: rgba(255,255,255,.6);
+}
+.paywall-title { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+.paywall p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+
+@media (min-width: 640px) {
+  .setup-hero { padding-top: 34px; }
+  .setup-hero h1 { font-size: 46px; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 开局设定 -->
+  <section id="screen-setup" class="screen active">
+    <div id="share-banner" class="share-banner hidden">
+      <span id="share-banner-text"></span>
+      <button id="btn-reroll-inherit" class="link-btn">掷个随机人设挑战</button>
+    </div>
+
+    <header class="setup-hero">
+      <div class="hero-pill">人生模拟器 · 第一期</div>
+      <h1>裸辞之后的一年</h1>
+      <p class="tagline">同样的辞职，不同的活法。<br>先把你的人设摆上桌。</p>
+    </header>
+
+    <div class="setup-form">
+      <div class="form-card">
+        <div class="field">
+          <label>年龄</label>
+          <div class="num-row">
+            <button class="step-btn" data-step="in-age" data-dir="-1">−</button>
+            <input type="number" id="in-age" min="22" max="40" value="28" inputmode="numeric">
+            <span class="unit">岁</span>
+            <button class="step-btn" data-step="in-age" data-dir="1">+</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>裸辞前月薪</label>
+          <div class="num-row">
+            <button class="step-btn" data-step="in-salary" data-dir="-1">−</button>
+            <input type="number" id="in-salary" min="3000" max="80000" step="1000" value="15000" inputmode="numeric">
+            <span class="unit">元</span>
+            <button class="step-btn" data-step="in-salary" data-dir="1">+</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>存款</label>
+          <div class="num-row">
+            <button class="step-btn" data-step="in-savings" data-dir="-1">−</button>
+            <input type="number" id="in-savings" min="1000" max="500000" step="5000" value="80000" inputmode="numeric">
+            <span class="unit">元</span>
+            <button class="step-btn" data-step="in-savings" data-dir="1">+</button>
+          </div>
+          <div class="field-hint" id="savings-hint"></div>
+        </div>
+
+        <div class="field">
+          <label>性别</label>
+          <div class="seg" id="seg-gender">
+            <button class="seg-btn selected" data-value="female">女生</button>
+            <button class="seg-btn" data-value="male">男生</button>
+            <button class="seg-btn" data-value="secret">不透露</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>住房</label>
+          <div class="seg" id="seg-housing">
+            <button class="seg-btn" data-value="none">住家里</button>
+            <button class="seg-btn selected" data-value="rent">租房</button>
+            <button class="seg-btn" data-value="mortgage">还房贷</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>家庭</label>
+          <div class="seg" id="seg-family">
+            <button class="seg-btn selected" data-value="single">单身</button>
+            <button class="seg-btn" data-value="partner">有伴侣</button>
+            <button class="seg-btn" data-value="kid">有娃</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>城市</label>
+          <div class="seg" id="seg-city">
+            <button class="seg-btn selected" data-value="tier1">一线</button>
+            <button class="seg-btn" data-value="newtier">新一线</button>
+            <button class="seg-btn" data-value="hometown">老家</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview" id="burn-preview"></div>
+
+      <div class="setup-actions">
+        <button id="btn-random" class="btn soft">手气不错 🎲</button>
+        <button id="btn-start" class="btn primary">开始这一年 →</button>
+      </div>
+      <p class="setup-footnote">12 个月，10 分钟，一个结局，一张人格卡。</p>
+    </div>
+  </section>
+
+  <!-- 月度推演 -->
+  <section id="screen-game" class="screen">
+    <header class="game-header">
+      <div class="month-row">
+        <div class="month-label" id="month-tag"></div>
+        <div class="cash-tag" id="cash-tag"></div>
+      </div>
+      <div class="progress-dots" id="progress-dots"></div>
+    </header>
+
+    <div class="status-panels">
+      <div class="stat">
+        <div class="stat-label"><span>心态</span><output id="out-mentality"></output></div>
+        <div class="bar"><div id="bar-mentality" class="bar-fill mentality"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label"><span>职业竞争力</span><output id="out-comp"></output></div>
+        <div class="bar"><div id="bar-comp" class="bar-fill comp"></div></div>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <div class="event-cat" id="event-cat"></div>
+      <h3 id="event-title"></h3>
+      <p id="event-text"></p>
+    </div>
+
+    <div id="choice-area"></div>
+  </section>
+
+  <!-- 月度报告 -->
+  <section id="screen-report" class="screen">
+    <header class="game-header">
+      <div class="month-row">
+        <div class="month-label" id="report-month-tag"></div>
+      </div>
+      <div class="progress-dots" id="report-progress-dots"></div>
+    </header>
+    <div class="report-card">
+      <h3 id="report-title"></h3>
+      <div id="report-lines" class="report-lines"></div>
+      <div class="report-status" id="report-status"></div>
+    </div>
+    <button id="btn-next-month" class="btn primary wide">下个月 →</button>
+  </section>
+
+  <!-- 结局 -->
+  <section id="screen-end" class="screen">
+    <header class="end-hero" id="end-hero">
+      <div class="end-line" id="end-line"></div>
+      <h2 id="end-title"></h2>
+      <p id="end-text"></p>
+    </header>
+
+    <div id="montage" class="montage"></div>
+
+    <div class="personality-box" id="personality-box">
+      <div class="p-label">你 的 裸 辞 人 格</div>
+      <div class="p-name" id="p-name"></div>
+      <p class="p-roast" id="p-roast"></p>
+      <div class="p-rarity" id="p-rarity"></div>
+    </div>
+
+    <div class="end-stats" id="end-stats"></div>
+    <div class="end-quote" id="end-quote"></div>
+
+    <div class="end-actions">
+      <button id="btn-card" class="btn primary">生成我的结局卡</button>
+      <button id="btn-replay" class="btn soft">再来一局</button>
+      <button id="btn-share-link" class="btn soft">用我的人设拉朋友进来</button>
+    </div>
+
+    <div id="card-area" class="card-area hidden">
+      <canvas id="card-canvas" width="1080" height="1440"></canvas>
+      <a id="card-download" class="btn primary wide" download="luoci-ending-card.png">保存图片 · 发小红书</a>
+      <p class="card-tip">长按或右键也能保存</p>
+    </div>
+
+    <div class="paywall">
+      <div class="paywall-title">🔒 十年推演 · 三线对比</div>
+      <p>如果当初没辞 / 如果第 3 个月就找工作 / 如果那年去了另一个城市——三条时间线的结局对比</p>
+      <button class="btn soft" disabled>¥9.9 解锁（开发中，先替你省钱）</button>
+    </div>
+  </section>
+
+</div>
+<!--BUILD_SCRIPTS-->
+<script>
+(function (global) {
+  'use strict';
+
+  var CONFIG = {
+    MONTHS: 12,
+
+    city: {
+      tier1:   { name: '一线城市', rent: 5000, living: 4200 },
+      newtier: { name: '新一线',   rent: 3200, living: 3200 },
+      hometown:{ name: '老家',     rent: 1500, living: 2200 }
+    },
+
+    familyCoef: { single: 1.0, partner: 1.25, kid: 1.7 },
+    mortgageRate: 0.45,
+
+    mentality: {
+      start: 82,
+      novelty: 4,
+      noveltyMonths: 2,
+      restBonus: 4,
+      restFadeFrom: 4,
+      rejection: -6,
+      anxietyLine: 3,
+      anxietyHit: -6,
+      emoThreshold: 20
+    },
+
+    comp: {
+      start: 100,
+      decay: -3,
+      gigDecay: -1,
+      learnGain: 4,
+      boomGain: 8
+    },
+
+    hunt: {
+      offerBase: 0.05,
+      offerScale: 200,
+      offerMin: 0.05,
+      offerMax: 0.40,
+      agePenalty: 0.05,
+      referralBonus: 0.15,
+      boomBonus: 0.20,
+      buffCap: 0.60,
+      interviews: [
+        { comp: 90, extra: 2 },
+        { comp: 70, extra: 1 }
+      ]
+    },
+
+    gig: { incomeRate: 0.35 },
+    learn: { cost: 500 },
+    frugal: { rate: 0.7 },
+
+    personality: {
+      compositeGap: 2,
+      bonus: {
+        gamblerBigBets: 3,
+        lyingStreak: 4,
+        grinderRatio: 3,
+        wavererSwitches: 4
+      },
+      grinderRatio: 0.4,
+      wavererMinSwitches: 3,
+      lyingStreak: 3
+    },
+
+    endings: {
+      betterSalary: 1.1,
+      transformMentality: 40
+    },
+
+    llm: {
+      enabled: false,
+      url: '',
+      apiKey: '',
+      model: '',
+      timeoutMs: 6000
+    }
+  };
+
+  global.LC = global.LC || {};
+  global.LC.CONFIG = CONFIG;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var EVENTS = [
+
+  // ===== 求职 =====
+  { id: 'e_read_noreply', cat: 'job', title: '已读不回', weight: 3, once: true,
+    cond: function (s) { return s.huntCount >= 1; },
+    effects: { mentality: -3 },
+    text: '投出去的第 17 份简历,状态停在「已读」。招聘软件把你的期望薪资,显示成了一种奢望。' },
+
+  { id: 'e_interview_wave', cat: 'job', title: '面试邀约集中来了', weight: 3, once: true,
+    cond: function (s) { return s.huntCount >= 2; },
+    effects: { mentality: 3, offerBuff: { value: 0.10, months: 2 } },
+    text: '三家公司在同一周约了你。久旱逢甘霖,你连自我介绍都练出了肌肉记忆。' },
+
+  { id: 'e_lowball', cat: 'job', title: '一个压薪的 offer', weight: 4, once: true,
+    cond: function (s) { return s.comp < 75 && s.huntCount >= 2; },
+    text: '终于有公司愿意要你了,只是 HR 报出的数字比原来低了两成:"空窗期嘛,您也理解。"这份 offer 像一艘救生艇,就是漏着水。',
+    choice: { options: [
+      { label: '接了,先上岸', note: '薪资打 78 折,但现金流回来了', settleOffer: 0.78, tags: { pragmatist: 2 } },
+      { label: '拒绝,再等等', note: '心态 -4,你赌后面有更好的', effects: { mentality: -4 }, tags: { gambler: 1 } }
+    ] } },
+
+  { id: 'e_gap_question', cat: 'job', title: '空窗期拷问', weight: 3, once: true,
+    cond: function (s) { return s.stats.interviews >= 2; },
+    effects: { mentality: -2 },
+    text: '面试官扫着你的简历:"这几个月空窗,您在做什么?"这个问题的标准答案,你在网上收藏了七个版本,此刻一个都想不起来。',
+    choice: { options: [
+      { label: '坦诚说了真实想法', note: '心态起伏取决于你的底气', effects: { mentality: 3 }, tags: { grinder: 1 } },
+      { label: '说在照顾家人', note: '圆过去了,但心里空落落的', effects: { mentality: -1 } }
+    ] } },
+
+  { id: 'e_referral', cat: 'job', title: '前同事内推', weight: 5, once: true,
+    effects: { mentality: 3, offerBuff: { value: 0.15, months: 3 } },
+    text: '前同事发来消息:"我们组在招人,简历发我,我直接推给 leader。"你把三天前更新的简历又改了两版才发出去。' },
+
+  { id: 'e_layoff_news', cat: 'job', title: '前司裁员上热搜', weight: 3, once: true,
+    cond: function (s) { return s.month >= 2; },
+    effects: { mentality: 3 },
+    text: '前司裁员的消息冲上了热搜。评论区一片"还好跑得早",你盯着自己空空的排期表,说不清是庆幸还是恍惚。' },
+
+  { id: 'e_background_check', cat: 'job', title: '背调卡在空窗期', weight: 4, once: true,
+    cond: function (s) { return s.month >= 6 && s.stats.interviews >= 3; },
+    effects: { mentality: -4 },
+    text: 'offer 都谈到薪级了,背调那关 HR 皱了眉:"这半年您在做什么?"你说在自由职业,对方"哦"了一声,之后再没打来。' },
+
+  { id: 'e_final_fail', cat: 'job', title: '终面挂了', weight: 4, once: true,
+    cond: function (s) { return s.stats.interviews >= 4; },
+    effects: { mentality: -5 },
+    text: '五轮面试,聊到 HR 和你核对入职时间,最后发来的却是"您与岗位匹配度略有差距"。你在楼下便利店买了瓶啤酒,那是那天唯一的慰藉。' },
+
+  // ===== 零活 =====
+  { id: 'e_private_job', cat: 'gig', title: '朋友介绍的私活', weight: 4, once: true,
+    effects: { cashRate: 0.6, mentality: 2 },
+    text: '朋友扔来一个私活:"你以前不是干这个的吗,帮忙做一版,钱照结。"你第一次发现,原来活儿可以绕过公司直接找你。' },
+
+  { id: 'e_stall', cat: 'gig', title: '要不要去摆摊', weight: 3, once: true,
+    cond: function (s) { return s.month >= 2; },
+    text: '刷了一晚上摆摊视频,你看着购物车里 39.9 的折叠桌和 89 的露营灯,犹豫要不要下单。',
+    choice: { options: [
+      { label: '下单,去试', note: '赚 1500,心态 +2,重要的是「做了」', effects: { cash: 1500, mentality: 2 }, tags: { pragmatist: 1 } },
+      { label: '算了,丢人', note: '心态 -2,但省下了 130 的运费', effects: { mentality: -2 } }
+    ] } },
+
+  { id: 'e_followers_grow', cat: 'gig', title: '账号涨粉了', weight: 3, once: true,
+    cond: function (s) { return s.lyingStreak >= 2 || s.month >= 4; },
+    effects: { mentality: 3 }, flags: { followers: true },
+    text: '随手发的裸辞日记意外爆了一条,评论区全是"世另我"。粉丝从 23 涨到了 4700,你截图的时候比发年终奖还开心。' },
+
+  { id: 'e_first_freelance_order', cat: 'gig', title: '自由职业第一单', weight: 4, once: true,
+    cond: function (s) { return s.comp >= 70 || s.learnCount >= 2; },
+    effects: { cashRate: 0.8, mentality: 4 },
+    text: '之前合作过的客户直接找上你:"这次不走对公,你个人接吗?"你盯着合同看了半小时,签字的手有点抖。' },
+
+  { id: 'e_gig_unpaid', cat: 'gig', title: '零活被拖欠了', weight: 3, once: true,
+    cond: function (s) { return s.gigCount >= 2; },
+    effects: { mentality: -4, cash: -2000 },
+    text: '干了一个月的活儿,结款日对方开始"在忙""下周一定"。你终于理解了自由职业者为什么都有个记账本,和一副好脾气。' },
+
+  { id: 'e_side_hustle_hit', cat: 'gig', title: '副业月入过万', weight: 5, once: true,
+    cond: function (s) { return s.flags.followers || s.gigCount >= 3; },
+    text: '副业收入第一次超过了原工资。你看着两份收入截图,突然意识到一个问题:你还需要回去上班吗?',
+    choice: { options: [
+      { label: '全力做,这就是我要的活法', note: '转型线:自由职业者', transform: 'freelance', tags: { minimalist: 2 } },
+      { label: '兼着来,留条后路', note: '+8000,心态 +3', effects: { cash: 8000, mentality: 3 }, tags: { pragmatist: 1 } }
+    ] } },
+
+  // ===== 风口 =====
+  { id: 'e_startup_invite', cat: 'boom', title: '前同事拉你创业', weight: 5, once: true,
+    cond: function (s) { return s.month >= 3 && !s.pendingBet; },
+    text: '前同事约你喝酒,三杯下肚掏出商业计划书:"出来干,就缺你这样的。"你摸了摸口袋,那里面躺着你的全部底气。',
+    choice: { options: [
+      { label: '押上大半存款跟一把', note: '梭哈:押 60% 存款,两个月后开奖', bigBet: true, bet: { kind: 'startup', stakeRate: 0.6 }, tags: { gambler: 2 } },
+      { label: '出点小钱占个位', note: '小赌怡情:押 15% 存款', bet: { kind: 'startup', stakeRate: 0.15 }, tags: { gambler: 1 } },
+      { label: '婉拒,伤不起', note: '心态 -1,但你睡得着', effects: { mentality: -1 } }
+    ] } },
+
+  { id: 'e_boom_hiring', cat: 'boom', title: '风口行业在招人', weight: 4, once: true,
+    cond: function (s) { return s.comp >= 75; },
+    effects: { mentality: 2, offerBuff: { value: 0.20, months: 2 } },
+    text: '某风口行业批量招人的新闻刷了屏,评论区说"现在上车还来得及"。你的简历还停留在半年前的版本。' },
+
+  { id: 'e_neighbor_stall', cat: 'boom', title: '邻居的咖啡车', weight: 2, once: true,
+    effects: { mentality: 2 },
+    text: '楼下邻居把咖啡车开进了周末市集,朋友圈发的是流水和落日。你点了个赞,心里有个地方轻轻动了一下。' },
+
+  { id: 'e_hometown_call', cat: 'boom', title: '表哥喊你回去合伙', weight: 5, once: true,
+    cond: function (s) { return s.month >= 3; },
+    text: '老家表哥的视频电话:镇上旺铺在转让,他出餐饮你出脑子,"回来合伙,比在大城市给人打工强"。',
+    choice: { options: [
+      { label: '回去看看', note: '埋下一条时间线', effects: { mentality: 2 }, flags: { hometownThread: true }, tags: { minimalist: 2 } },
+      { label: '先不回', note: '心态 -2,城市还没有放你走', effects: { mentality: -2 } }
+    ] } },
+
+  { id: 'e_shop_offer', cat: 'boom', title: '转让的旺铺在等你', weight: 5, once: true,
+    cond: function (s) { return s.flags.hometownThread && s.month >= 5; },
+    text: '表哥发来店铺视频:街坊人流、转让费报价、他手绘的招牌草图。"就等你一句话,错过这村没这店。"',
+    choice: { options: [
+      { label: '接下来,回老家开店', note: '转型线:小镇店主', transform: 'shop', tags: { minimalist: 3 } },
+      { label: '还是不敢', note: '心态 -3,深夜想起来会后悔的那种', effects: { mentality: -3 }, tags: { waverer: 1 } }
+    ] } },
+
+  { id: 'e_stock_friend', cat: 'boom', title: '朋友劝你炒股', weight: 3, once: true,
+    cond: function (s) { return s.month >= 3 && !s.pendingBet; },
+    text: '老同学神秘兮兮给你看他的收益曲线:"拿点闲钱出来,一年翻倍不是梦。"那截图的 P 图痕迹比收益还明显。',
+    choice: { options: [
+      { label: '押 30% 存款进股市', note: '牛市信仰,两个月后开奖', bigBet: true, bet: { kind: 'stock', stakeRate: 0.3 }, tags: { gambler: 2 } },
+      { label: '婉拒', note: '你安慰自己:慢慢变富', effects: { mentality: 1 } }
+    ] } },
+
+  { id: 'e_ai_training', cat: 'boom', title: '"三个月转行 AI"培训班', weight: 3, once: true,
+    cond: function (s) { return s.month >= 3; },
+    text: '信息流广告精准击中了你:"零基础三个月转行 AI,年薪 40 万起。"价格 9800,可分期。',
+    choice: { options: [
+      { label: '报名了', note: '-5000(分期首付),竞争力 +6', effects: { cash: -5000, comp: 6 }, tags: { grinder: 2 } },
+      { label: '无视', note: '收藏了海报,然后关掉', effects: { mentality: -1 } }
+    ] } },
+
+  { id: 'e_creator_wave', cat: 'boom', title: 'MCN 来挖你了', weight: 4, once: true,
+    cond: function (s) { return s.flags.followers && !s.pendingBet; },
+    text: 'MCN 机构私信你:"你这个赛道有潜力,全职做的话我们给流量扶持。"你盯着"全职"两个字,想起了存款余额。',
+    choice: { options: [
+      { label: '全职 all in 做号', note: '押 40% 存款(前期投入),两个月后开奖', bigBet: true, bet: { kind: 'creator', stakeRate: 0.4 }, tags: { gambler: 2 } },
+      { label: '白天零活晚上更新', note: '稳着来:零活收入 +,心态 +2', effects: { cashRate: 0.4, mentality: 2 }, tags: { pragmatist: 2 } }
+    ] } },
+
+  // ===== 家庭 =====
+  { id: 'e_relatives_dinner', cat: 'family', title: '亲戚饭局', weight: 3, once: true,
+    cond: function (s) { return s.month >= 3; },
+    effects: { mentality: -3 },
+    text: '饭桌上三姑问你"现在一个月挣多少",你夹菜的手停在了半空。全桌安静的那两秒,比任何面试都长。',
+    choice: { options: [
+      { label: '笑着岔开话题', note: '聊了聊表弟的婚事,心态 -1', effects: { mentality: -1 } },
+      { label: '坦诚:在休息一阵', note: '有勇气,心态 +2', effects: { mentality: 2 } }
+    ] } },
+
+  { id: 'e_mom_call', cat: 'family', title: '妈妈的电话', weight: 4, once: true,
+    cond: function (s) { return s.month >= 2; },
+    effects: { mentality: 4 },
+    text: '电话里妈妈没问工作,只说了天气预报和家里的菜价,最后加了一句"钱不够就说"。你"嗯"了一声,去阳台站了很久。' },
+
+  { id: 'e_family_money', cat: 'family', title: '家里要用钱', weight: 5, once: true,
+    cond: function (s) { return s.setup.family === 'kid' || s.month >= 6; },
+    text: '家里来电话说急用一笔钱。你看了眼余额--那个数字最近下跌的速度,你比谁都清楚。',
+    choice: { options: [
+      { label: '二话不说打过去', note: '-10000,心态 -2', effects: { cash: -10000, mentality: -2 }, tags: { pragmatist: 1 } },
+      { label: '说实话:最近也紧', note: '心态 -4,第一次承认自己也要被照顾', effects: { mentality: -4 } }
+    ] } },
+
+  { id: 'e_partner_talk', cat: 'family', title: '伴侣的深夜谈话', weight: 4, once: true,
+    cond: function (s) { return s.setup.family === 'partner' && s.month >= 4; },
+    text: '深夜,伴侣放下手机:"我们聊聊吧,之后怎么打算。"这句话你其实等了很久,也怕了很久。',
+    choice: { options: [
+      { label: '把担心都摊开说', note: '心态 +3,有人一起扛', effects: { mentality: 3 }, flags: { partnerSupport: true } },
+      { label: '"挺好的,别担心"', note: '心态 -3,两个人各自失眠', effects: { mentality: -3 } }
+    ] } },
+
+  { id: 'e_kid_question', cat: 'family', title: '孩子问你怎么不去上班', weight: 4, once: true,
+    cond: function (s) { return s.setup.family === 'kid' && s.month >= 3; },
+    text: '孩子砖在你腿上问："别的大人都去上班，你为什么天天在家？"你想着怎么用他能听懂的方式，讲一遍什么叫 gap。',
+    choice: { options: [
+      { label: '编了个"在放假"', note: '心态 -2,谎言会过期', effects: { mentality: -2 } },
+      { label: '说了实话', note: '心态 +2,他听不太懂,但他抱了你', effects: { mentality: 2 } }
+    ] } },
+
+  { id: 'e_parents_backup', cat: 'family', title: '爸妈的那句话', weight: 5, once: true,
+    cond: function (s) { return s.mentality < 40; },
+    effects: { mentality: 6 },
+    text: '电话那头,爸爸难得说了句软话:"真不行就回来,家里永远有你一副碗筷。"你在出租屋里,没绷住。' },
+
+  { id: 'e_newyear_pressure', cat: 'family', title: '年关将至', weight: 5, once: true,
+    cond: function (s) { return s.month >= 10; },
+    effects: { mentality: -4 },
+    text: '街上开始挂灯笼,家族群里开始统计谁回不回家。你数了数存款,又数了数回家的天数。' },
+
+  // ===== 意外 =====
+  { id: 'e_sick', cat: 'accident', title: '一场感冒变肺炎', weight: 3, once: true,
+    effects: { cash: -3000, mentality: -3 },
+    text: '硬扛了一周的感冒进了医院,医生皱着眉开了单子。你第一次庆幸,也第一次心慌--医保个人账户里的钱,也是钱。' },
+
+  { id: 'e_phone_screen', cat: 'accident', title: '手机屏碎了', weight: 2, once: true,
+    effects: { cash: -1500, mentality: -2 },
+    text: '手机屏幕在地铁口摔出了蛛网。维修店报价 1500,你问"贴膜凑合行吗",老板看了你一眼,像看穿了你的余额。' },
+
+  { id: 'e_rent_raise', cat: 'accident', title: '房东涨租', weight: 4, once: true,
+    cond: function (s) { return s.setup.housing === 'rent' && s.month >= 3; },
+    text: '房东微信:"下季度起房租涨 500,市场行情。"你盯着"市场行情"四个字,反手收藏了两条通勤 1.5 小时的房源。',
+    choice: { options: [
+      { label: '默默接受', note: '月支出 +500,心态 -3', effects: { mentality: -3 }, burnMod: 500 },
+      { label: '搬到更远的便宜房子', note: '搬家费 -2000,月支出 -800,心态 +2', effects: { cash: -2000, mentality: 2 }, burnMod: -800, tags: { minimalist: 1 } }
+    ] } },
+
+  { id: 'e_subscriptions', cat: 'accident', title: '被扣了遗忘的订阅', weight: 2, once: true,
+    effects: { cash: -300, mentality: -1 },
+    text: '月底盘点,你发现还在为上班时的自己付费:健身年卡、网盘会员、知识付费专栏。那是另一个人留下的账单。' },
+
+  { id: 'e_year_end_bonus', cat: 'accident', title: '离职后的年终惊喜', weight: 3, once: true,
+    cond: function (s) { return s.month >= 4; },
+    effects: { cashRate: 0.5, mentality: 3 },
+    text: '前司财务发来消息:去年绩效折算有一笔补发。收下这笔"分手费"时,心情复杂得像收到前任的婚礼请柬。' },
+
+  { id: 'e_former_dept_gone', cat: 'accident', title: '前部门解散了', weight: 3, once: true,
+    cond: function (s) { return s.month >= 3; },
+    effects: { mentality: 4 },
+    text: '老同事群里炸了:你原来的部门整组被裁。曾经和你抢同一个晋升名额的人,现在在群里互发简历。你退群的手停在半空,又收了回来。' },
+
+  { id: 'e_midnight_hospital', cat: 'accident', title: '深夜的急诊', weight: 4, once: true,
+    cond: function (s) { return s.mentality < 30; },
+    effects: { cash: -2000, mentality: -3 },
+    text: '凌晨三点急性肠胃炎,自己打车、自己挂号、自己输液。护士问"家属呢",你说"就我自己",对方"哦"了一声。你突然很想哭。' },
+
+  // ===== 社交 =====
+  { id: 'e_dinner_old_colleagues', cat: 'social', title: '前同事聚餐', weight: 3, once: true,
+    cond: function (s) { return s.month >= 2; },
+    text: '前同事组的局,群里都在聊新项目新 title。被@到你的时候,你正躺在家里,第三天没洗头。',
+    choice: { options: [
+      { label: '去了', note: '聊出了内推机会,但听了一晚上"等你回来上班"', effects: { mentality: 1, offerBuff: { value: 0.10, months: 2 } }, tags: { pragmatist: 1 } },
+      { label: '没去', note: '心态 +1,世界安静了,但好像也更小了', effects: { mentality: 1 }, flags: { isolation: true } }
+    ] } },
+
+  { id: 'e_classmate_promotion', cat: 'social', title: '同学升职朋友圈', weight: 3, once: true,
+    effects: { mentality: -3 },
+    text: '大学同学晒出新 title 和工牌照,配文"新的起点,继续加油"。你点了个赞,把手机扣在桌上,五分钟没拿起来。' },
+
+  { id: 'e_resigned_friend', cat: 'social', title: '网上认识的同路人', weight: 3, once: true,
+    cond: function (s) { return s.month >= 2; },
+    effects: { mentality: 4 },
+    text: '裸辞互助群里,一个陌生人私信:"我也刚辞,天天焦虑到失眠。"你们互相吐槽了两小时,焦虑没解决,但好像轻了一点--原来不是只有我这样。' },
+
+  { id: 'e_boss_return', cat: 'social', title: '前领导半夜找你', weight: 5, once: true,
+    cond: function (s) { return s.month >= 6; },
+    text: '前领导凌晨发来消息:"组里最近走不开人,你愿不愿意回来,职级平移。"你盯着这条消息,像盯着命运递回来的一张旧船票。',
+    choice: { options: [
+      { label: '聊了,接了旧船票', note: '薪资 95 折回归,现金流回来了', settleOffer: 0.95, tags: { pragmatist: 2 } },
+      { label: '已读不回', note: '心态 +2,你在赌一个不一样的未来', effects: { mentality: 2 }, tags: { gambler: 1 } }
+    ] } },
+
+  { id: 'e_gym_buddy', cat: 'social', title: '健身房搭子', weight: 3, once: true,
+    cond: function (s) { return s.restCount >= 2; },
+    effects: { mentality: 4 },
+    text: '常去的健身房里,搭子说你最近状态好了不少:"不上班果然养人啊。"你笑笑没解释,但那天多加了两组重量。' },
+
+  { id: 'e_diary_viral', cat: 'social', title: '裸辞日记小火一把', weight: 4, once: true,
+    cond: function (s) { return s.month >= 4 && (s.flags.followers || s.lyingStreak >= 2); },
+    effects: { mentality: 5 }, flags: { followers: true },
+    text: '你记录裸辞日常的帖子突然被顶上热门,评论区 800 条"世另我""蹲后续"。原来这么多人,在过和你一样的生活。' },
+
+  { id: 'e_emo_night', cat: 'social', title: '天花板时间', weight: 8, once: false,
+    cond: function (s) { return s.mentality < 20 && !s.emoSeen; },
+    effects: { mentality: -5 },
+    text: '凌晨三点,你睁着眼睛看天花板。裸辞时想好的十件事,一件都没做,但刷完了 300 条短视频。夜里的自己,总在审判白天的自己。',
+    choice: { options: [
+      { label: '发条动态,又删掉', note: '心态 -2,没人知道你到过凌晨三点', effects: { mentality: -2 } },
+      { label: '给朋友发了句"在吗"', note: '心态 +3,他回:"我也没睡', effects: { mentality: 3 }, flags: { emoDone: true, socialSupport: true } }
+    ] } }
+
+  ];
+
+  var MILESTONES = {
+    4: ['e_referral', 'e_startup_invite', 'e_hometown_call'],
+    8: ['e_boss_return', 'e_family_money', 'e_boom_hiring'],
+    12: ['e_newyear_pressure']
+  };
+
+  global.LC = global.LC || {};
+  global.LC.EVENTS = EVENTS;
+  global.LC.MILESTONES = MILESTONES;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var PERSONALITIES = {
+    gambler: {
+      name: '孤注一掷型',
+      roast: '你不是不怕输，你是怕不刺激。命运发牌的时候，你从来不看对子，只看能不能梭哈。',
+      hint: '押上存款赌风口的人'
+    },
+    pragmatist: {
+      name: '骑驴找马型',
+      roast: '你的辞职是 Excel 做的。别人在过人生，你在做风控。',
+      hint: '先止血再图谋的人'
+    },
+    lyingFlat: {
+      name: '躺到天荒地老型',
+      roast: '你辞的不是职，是闹钟。只是那张床，早晚要向房租低头。',
+      hint: '把 gap 过成长假的人'
+    },
+    grinder: {
+      name: '卷王重开型',
+      roast: '别人 gap 是休息，你 gap 是闭关。建议你连辞职都做 OKR。',
+      hint: '空窗期偷偷升级的人'
+    },
+    minimalist: {
+      name: '断舍离型',
+      roast: '你从大城市带走的东西不多，但你扔下的东西很重。',
+      hint: '换一种活法的人'
+    },
+    waverer: {
+      name: '反复横跳型',
+      roast: '这一局你把所有流派都试了一遍，就是没试过「想清楚」。',
+      hint: '策略月月换的人'
+    }
+  };
+
+  global.LC = global.LC || {};
+  global.LC.PERSONALITIES = PERSONALITIES;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var fmtWan = function (n) { return (n / 10000).toFixed(1) + ' 万'; };
+
+  var ENDINGS = {
+    better: {
+      line: '翻身线',
+      titles: [
+        'GAP 半年，我找到了比原来好 30% 的工作',
+        '裸辞这一年，是我赚了',
+        '离开的时候是赌气，回来的时候是底气'
+      ],
+      text: function (s) {
+        return '第 ' + s.month + ' 个月，你签下了新 offer：' +
+          fmtWan(s.newSalary) + '/月，比原来涨了 ' +
+          Math.round((s.newSalary / s.setup.salary - 1) * 100) + '%。' +
+          '当初所有人都说你冲动，现在他们说你有魄力。只有你知道，中间那 ' + s.month + ' 个月，你是怎么一晚一晚熬过来的。';
+      }
+    },
+
+    _return: {
+      line: '回归线',
+      titles: [
+        '扛到第 N 个月，我回去上班了，但这次选对了',
+        '绕了一圈，我回到了工位',
+        '工资条回来了，有些东西不一样了'
+      ],
+      text: function (s) {
+        return '第 ' + s.month + ' 个月，你重新坐回工位：' + fmtWan(s.newSalary) + '/月，' +
+          '是原来工资的 ' + Math.round(s.newSalary / s.setup.salary * 100) + '%。' +
+          '同样格子间，同样通勤，但你清楚哪里不一样了——你知道自己随时可以走，而公司不知道。这一年没白过，它只是换了种方式留在你身上。';
+      }
+    },
+
+    transform: {
+      line: '转型线',
+      titles: [
+        '裸辞勇者，最终在老家开了店',
+        '不上班的第七个月，我靠手艺活了下来',
+        '我把人生，改成了我自己的版本'
+      ],
+      text: function (s) {
+        var where = s.transformKind === 'shop' ? '你盘下了那间小店，招牌是表哥手绘的那版' :
+          '你把接活的微信名改成了工作室，名片自己印的';
+        return '第 ' + s.month + ' 个月，' + where + '。' +
+          '收入不算稳定，但每一分钱都直接进你口袋，没有中间商赚你的命。' +
+          '有人问你后不后悔，你想了想说：我后悔过很多次，唯独没后悔这一次。';
+      }
+    },
+
+    crash: {
+      line: '崩盘线',
+      titles: [
+        '存款清零：一次冲动换来的必修课',
+        '我在第 N 个月，按下了重启键',
+        '这一局，输给了现实'
+      ],
+      text: function (s) {
+        var why = s.cash <= 0 ? '存款归零' : '心态见底';
+        return '第 ' + s.month + ' 个月，' + why + '。' +
+          '你不是没努力，是努力没换来回声，而账单不等人。' +
+          '你退掉出租屋的那天，天气很好，好得像在嘲讽。但这局没输完——你至少知道了自己的极限在哪，下次冲锋前，你会先看看地图。';
+      }
+    },
+
+    fog: {
+      line: '迷雾线',
+      titles: [
+        '第 12 个月，我还在找方向',
+        '一年过去了，答案还在路上',
+        '没有结局，也是一种结局'
+      ],
+      text: function (s) {
+        return '整整 ' + s.MONTHS + ' 个月，你没崩盘，也没上岸。存款还剩 ' + fmtWan(Math.max(s.cash, 0)) +
+          '，心态还撑得住 ' + s.mentality + '。' +
+          '这个故事没有爽点，但也没有崩点——你就是大多数裸辞者的真实版本：在迷雾里走，走着走着，雾里好像有了一点光。下一局，往有光的地方走。';
+      }
+    }
+  };
+
+  var QUOTES = [
+    '裸辞解决不了问题，但先解决「不许离开」这个问题。',
+    '人生没有白走的路，但有白花的存款。',
+    '你以为你在休息，其实你在重新选一次人生。',
+    '存款是底气，不是棺材本；但它真的会变成棺材本，如果你不回血。',
+    '勇气不是辞掉工作的那一刻，是辞掉之后的每一天。',
+    '别人问你空窗期在干嘛，标准答案是：在活。',
+    '工资养活身体，gap 养活灵魂，存款负责给两个都续命。',
+    '所有命运馈赠的自由，早已在账单里标好了价格。',
+    '你没落后，你只是换了个赛道，而那个赛道的计时器还没造出来。',
+    '回来的船票永远有，但出发的潮水不一定有。',
+    '后悔是裸辞的售后服务，每人一份，无法退货。',
+    '真正的铁饭碗不是一份工作，是走到哪都能吃上饭的本事。'
+  ];
+
+  global.LC = global.LC || {};
+  global.LC.ENDINGS = ENDINGS;
+  global.LC.QUOTES = QUOTES;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var CFG = global.LC.CONFIG;
+
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var rng = Math.random;
+  var setSeed = function (seed) { rng = mulberry32(seed); };
+
+  function randInt(min, max) { return min + Math.floor(rng() * (max - min + 1)); }
+  function pick(arr) { return arr[Math.floor(rng() * arr.length)]; }
+
+  function create(setup) {
+    return {
+      setup: setup,
+      MONTHS: CFG.MONTHS,
+      month: 0,
+      phase: 'idle',
+      cash: setup.savings,
+      initialCash: setup.savings,
+      mentality: CFG.mentality.start,
+      comp: CFG.comp.start,
+      burnMods: [],
+      frugalMonths: 0,
+      offerBuff: [],
+      usedEvents: {},
+      pendingBet: null,
+      pendingOffer: null,
+      pendingEvent: null,
+      eventChoiceTaken: false,
+      employed: false,
+      newSalary: 0,
+      transformKind: null,
+      ended: false,
+      endingKey: null,
+      endMonth: null,
+      lastPlan: null,
+      emoSeen: false,
+      flags: {},
+      tags: {},
+      planHistory: [],
+      strategySwitches: 0,
+      bigBets: 0,
+      huntCount: 0,
+      gigCount: 0,
+      learnCount: 0,
+      restCount: 0,
+      lyingStreak: 0,
+      longestLyingStreak: 0,
+      freeIncomeRate: 0,
+      stats: {
+        interviews: 0,
+        offersRejected: 0,
+        minMentality: CFG.mentality.start,
+        lowestCash: setup.savings,
+        peakCash: setup.savings
+      }
+    };
+  }
+
+  function burnRate(s) {
+    var city = CFG.city[s.setup.city];
+    var housing = 0;
+    if (s.setup.housing === 'rent') housing = city.rent;
+    if (s.setup.housing === 'mortgage') housing = Math.round(s.setup.salary * CFG.mortgageRate / 100) * 100;
+    var base = housing + city.living * CFG.familyCoef[s.setup.family];
+    var mod = 0;
+    for (var i = 0; i < s.burnMods.length; i++) mod += s.burnMods[i];
+    var burn = base + mod;
+    if (burn < base * 0.5) burn = Math.round(base * 0.5);
+    if (s.frugalMonths > 0) burn = Math.round(burn * CFG.frugal.rate);
+    return Math.round(burn / 100) * 100;
+  }
+
+  function currentEvent(s) {
+    if (!s.pendingEvent) return null;
+    var pool = global.LC.EVENTS.filter(function (e) { return e.id === s.pendingEvent.id; });
+    return pool[0] || null;
+  }
+
+  function drawEvent(s) {
+    var ev = null;
+    var ms = global.LC.MILESTONES[s.month];
+    if (ms) {
+      for (var i = 0; i < ms.length; i++) {
+        var cand = global.LC.EVENTS.filter(function (e) { return e.id === ms[i]; })[0];
+        if (cand && !s.usedEvents[cand.id] && (!cand.cond || cand.cond(s))) { ev = cand; break; }
+      }
+    }
+    if (!ev) {
+      var cands = global.LC.EVENTS.filter(function (e) {
+        if (e.once && s.usedEvents[e.id]) return false;
+        if (e.cond && !e.cond(s)) return false;
+        return true;
+      });
+      if (cands.length) {
+        var total = 0, k;
+        for (k = 0; k < cands.length; k++) total += (cands[k].weight || 2);
+        var roll = rng() * total;
+        for (k = 0; k < cands.length; k++) {
+          roll -= (cands[k].weight || 2);
+          if (roll <= 0) { ev = cands[k]; break; }
+        }
+        if (!ev) ev = cands[cands.length - 1];
+      }
+    }
+    if (!ev) { s.pendingEvent = null; return null; }
+    if (ev.once) s.usedEvents[ev.id] = true;
+    if (ev.id === 'e_emo_night') s.emoSeen = true;
+    if (ev.effects) applyEffects(s, ev.effects);
+    if (ev.flags) mergeFlags(s, ev.flags);
+    s.eventChoiceTaken = !ev.choice;
+    s.pendingEvent = { id: ev.id, hadChoice: !!ev.choice };
+    return ev;
+  }
+
+  function applyEffects(s, effects) {
+    var lines = [];
+    if (effects.cash) { s.cash += effects.cash; lines.push('现金 ' + fmtSigned(effects.cash)); }
+    if (effects.cashRate) {
+      var amt = Math.round(s.setup.salary * effects.cashRate / 100) * 100;
+      s.cash += amt; lines.push('现金 ' + fmtSigned(amt));
+    }
+    if (effects.mentality) { s.mentality = clamp(s.mentality + effects.mentality, 0, 100); lines.push('心态 ' + fmtSigned(effects.mentality)); }
+    if (effects.comp) { s.comp = clamp(s.comp + effects.comp, 0, 100); lines.push('竞争力 ' + fmtSigned(effects.comp)); }
+    if (effects.offerBuff) {
+      s.offerBuff.push({ value: effects.offerBuff.value, months: effects.offerBuff.months || 2 });
+      lines.push('求职运气上升');
+    }
+    if (effects.freeIncomeRate) s.freeIncomeRate = Math.max(s.freeIncomeRate, effects.freeIncomeRate);
+    return lines;
+  }
+
+  function mergeFlags(s, flags) {
+    for (var k in flags) if (flags[k]) s.flags[k] = true;
+  }
+
+  function addTags(s, tags) {
+    if (!tags) return;
+    for (var k in tags) s.tags[k] = (s.tags[k] || 0) + tags[k];
+  }
+
+  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+  function fmtSigned(n) { return (n >= 0 ? '+' : '') + n; }
+
+  function resolveEvent(s, optIndex) {
+    var ev = currentEvent(s);
+    if (!ev || !ev.choice || s.eventChoiceTaken) return null;
+    var opt = ev.choice.options[optIndex];
+    s.eventChoiceTaken = true;
+    var lines = [];
+    if (opt.effects) lines = lines.concat(applyEffects(s, opt.effects));
+    if (opt.flags) mergeFlags(s, opt.flags);
+    addTags(s, opt.tags);
+    if (opt.bigBet) s.bigBets++;
+    if (opt.burnMod) s.burnMods.push(opt.burnMod);
+    if (opt.bet) {
+      var stake = Math.round(s.cash * opt.bet.stakeRate / 100) * 100;
+      s.cash -= stake;
+      s.pendingBet = { kind: opt.bet.kind, stake: stake, startedMonth: s.month };
+      lines.push('押注 ' + stake + ' 元');
+    }
+    var endKey = null;
+    if (opt.settleOffer) {
+      s.employed = true;
+      s.newSalary = Math.round(s.setup.salary * opt.settleOffer / 100) * 100;
+      endKey = '_return';
+    } else if (opt.transform) {
+      s.transformKind = opt.transform;
+      endKey = 'transform';
+      if (s.mentality < CFG.endings.transformMentality) {
+        lines.push('你不是带着答案走的，你是带着倦意走的。');
+      }
+    }
+    if (endKey) global.LC.Engine._endGame(s, endKey);
+    return { lines: lines, ended: s.ended, endKey: endKey };
+  }
+
+  global.LC = global.LC || {};
+  global.LC.Engine = {
+    create: create,
+    setSeed: setSeed,
+    _rng: function () { return rng; },
+    burnRate: burnRate,
+    drawEvent: drawEvent,
+    resolveEvent: resolveEvent,
+    currentEvent: currentEvent,
+    _internal: {
+      applyEffects: applyEffects,
+      addTags: addTags,
+      clamp: clamp,
+      mergeFlags: mergeFlags,
+      randInt: randInt,
+      pick: pick
+    }
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+(function (global) {
+  'use strict';
+
+  var E = global.LC.Engine;
+  var I = E._internal;
+  var CFG = global.LC.CONFIG;
+
+  var PLANS = {
+    hunt: { label: '投简历找工作', desc: '面试、谈薪，等待回声' },
+    gig:  { label: '接零活先止血', desc: '收入不多，但现金流在动' },
+    learn:{ label: '学习充电闭关', desc: '竞争力 +4，花钱不多' },
+    rest: { label: '躺平休整', desc: '心态回升，但时间在走' }
+  };
+
+  function startMonth(s) {
+    s.month++;
+    s.phase = 'event';
+    return E.drawEvent(s);
+  }
+
+  function offerChance(s) {
+    var h = CFG.hunt;
+    var chance = h.offerBase + (s.comp - 50) / h.offerScale;
+    var buff = 0;
+    for (var i = 0; i < s.offerBuff.length; i++) buff += s.offerBuff[i].value;
+    chance += Math.min(buff, h.buffCap);
+    if (s.setup.age > 35) chance -= h.agePenalty;
+    return I.clamp(chance, h.offerMin, h.offerMax);
+  }
+
+  function choosePlan(s, planId) {
+    if (s.ended || s.phase !== 'plan') return null;
+    var lines = [];
+
+    if (s.lastPlan && s.lastPlan !== planId && planId !== s.lastPlan) {
+      s.strategySwitches++;
+    }
+    s.lastPlan = planId;
+    s.planHistory.push(planId);
+
+    var income = 0;
+    if (s.freeIncomeRate > 0) {
+      income += Math.round(s.setup.salary * s.freeIncomeRate / 100) * 100;
+    }
+
+    if (planId === 'hunt') {
+      s.huntCount++;
+      s.lyingStreak = 0;
+      var n = 1;
+      if (s.comp >= 90) n += 2; else if (s.comp >= 70) n += 1;
+      if (I.randInt(0, 100) < 30) n = Math.min(3, n + 1);
+      var chance = offerChance(s);
+      var gotOffer = null;
+      for (var i = 0; i < n; i++) {
+        s.stats.interviews++;
+        if (E._rng() < chance) {
+          gotOffer = Math.round(s.setup.salary * (s.comp / 100) * (0.85 + E._rng() * 0.4) / 100) * 100;
+          break;
+        }
+      }
+      lines.push('这个月面试了 ' + n + ' 次');
+      if (gotOffer) {
+        s.pendingOffer = gotOffer;
+        lines.push('有一个 offer 到手了：' + gotOffer + ' 元/月');
+      } else {
+        s.mentality = I.clamp(s.mentality + CFG.mentality.rejection, 0, 100);
+        lines.push('没有回声，心态 ' + CFG.mentality.rejection);
+      }
+      s.comp = I.clamp(s.comp - 1, 0, 100);
+    } else if (planId === 'gig') {
+      s.gigCount++;
+      s.lyingStreak = 0;
+      income += Math.round(s.setup.salary * CFG.gig.incomeRate / 100) * 100;
+      s.comp = I.clamp(s.comp + CFG.comp.gigDecay, 0, 100);
+      lines.push('零活收入 +' + Math.round(s.setup.salary * CFG.gig.incomeRate / 100) * 100);
+    } else if (planId === 'learn') {
+      s.learnCount++;
+      s.lyingStreak = 0;
+      s.comp = I.clamp(s.comp + CFG.comp.learnGain, 0, 100);
+      s.cash -= CFG.learn.cost;
+      lines.push('学习投入 -' + CFG.learn.cost + '，竞争力 +4');
+    } else {
+      s.restCount++;
+      s.lyingStreak++;
+      s.longestLyingStreak = Math.max(s.longestLyingStreak, s.lyingStreak);
+      var restBonus = s.lyingStreak <= 3 ? CFG.mentality.restBonus : (s.lyingStreak <= 5 ? 2 : 0);
+      s.mentality = I.clamp(s.mentality + restBonus, 0, 100);
+      s.comp = I.clamp(s.comp + CFG.comp.decay, 0, 100);
+      lines.push('躺平休整，心态 +' + restBonus);
+    }
+
+    var report = settleMonth(s, planId, income, lines);
+    s.phase = 'report';
+    return report;
+  }
+
+  function settleMonth(s, planId, income, lines) {
+    var burn = E.burnRate(s);
+    s.cash += income - burn;
+    lines.push('月支出 -' + burn);
+    if (income > 0) lines.push('收入 +' + income);
+
+    var M = CFG.mentality;
+    if (s.month <= M.noveltyMonths) {
+      s.mentality = I.clamp(s.mentality + M.novelty, 0, 100);
+      lines.push('裸辞新鲜感，心态 +' + M.novelty);
+    }
+    if (s.cash < burn * M.anxietyLine) {
+      s.mentality = I.clamp(s.mentality + M.anxietyHit, 0, 100);
+      lines.push('存款预警，心态 ' + M.anxietyHit);
+    }
+
+    s.stats.minMentality = Math.min(s.stats.minMentality, s.mentality);
+    s.stats.lowestCash = Math.min(s.stats.lowestCash, s.cash);
+    s.stats.peakCash = Math.max(s.stats.peakCash, s.cash);
+
+    if (s.frugalMonths > 0) s.frugalMonths--;
+    var keepBuffs = [];
+    for (var i = 0; i < s.offerBuff.length; i++) {
+      s.offerBuff[i].months--;
+      if (s.offerBuff[i].months > 0) keepBuffs.push(s.offerBuff[i]);
+    }
+    s.offerBuff = keepBuffs;
+
+    resolveBet(s, lines);
+
+    if ((s.cash <= 0 || s.mentality <= 0) && !s.pendingOffer) {
+      endGame(s, 'crash');
+    } else if (s.month >= s.MONTHS) {
+      endGame(s, 'fog');
+    }
+
+    return {
+      month: s.month,
+      plan: planId,
+      lines: lines,
+      burn: burn,
+      income: income,
+      offer: s.pendingOffer,
+      ended: s.ended
+    };
+  }
+
+  function resolveBet(s, lines) {
+    if (!s.pendingBet) return;
+    if (s.month - s.pendingBet.startedMonth < 2) return;
+    var bet = s.pendingBet;
+    s.pendingBet = null;
+    if (bet.kind === 'startup') {
+      if (E._rng() < 0.3) {
+        var gain = bet.stake * 3;
+        s.cash += gain;
+        s.comp = I.clamp(s.comp + CFG.comp.boomGain, 0, 100);
+        s.mentality = I.clamp(s.mentality + 10, 0, 100);
+        s.flags.startupWin = true;
+        lines.push('创业项目融资到账：押注 ' + bet.stake + ' 变成了 ' + gain + '，竞争力 +8，心态 +10');
+      } else {
+        var back = Math.round(bet.stake * 0.3 / 100) * 100;
+        s.cash += back;
+        s.mentality = I.clamp(s.mentality - 8, 0, 100);
+        lines.push('创业黄了：押注 ' + bet.stake + ' 只回来 ' + back + '，心态 -8');
+      }
+    } else if (bet.kind === 'stock') {
+      var r = -0.4 + E._rng() * 1.0;
+      var out = Math.round(bet.stake * (1 + r) / 100) * 100;
+      s.cash += out;
+      var d = out - bet.stake;
+      s.mentality = I.clamp(s.mentality + (d >= 0 ? 3 : -4), 0, 100);
+      lines.push('股票清仓：拿回 ' + out + '（' + (d >= 0 ? '盈' : '亏') + ' ' + Math.abs(d) + '）');
+    } else if (bet.kind === 'creator') {
+      var p = s.flags.followers ? 0.55 : 0.4;
+      if (E._rng() < p) {
+        s.cash += bet.stake;
+        s.freeIncomeRate = Math.max(s.freeIncomeRate, 0.6);
+        s.flags.followers = true;
+        s.mentality = I.clamp(s.mentality + 8, 0, 100);
+        lines.push('账号起来了：本金收回，每月多一份 ' + Math.round(s.setup.salary * 0.6) + ' 左右的流量收入，心态 +8');
+      } else {
+        var back2 = Math.round(bet.stake * 0.5 / 100) * 100;
+        s.cash += back2;
+        s.mentality = I.clamp(s.mentality - 6, 0, 100);
+        lines.push('号没做起来：投入折半回来，心态 -6');
+      }
+    }
+  }
+
+  function acceptOffer(s) {
+    if (!s.pendingOffer) return null;
+    s.employed = true;
+    s.newSalary = s.pendingOffer;
+    s.pendingOffer = null;
+    var key = s.newSalary >= Math.round(s.setup.salary * CFG.endings.betterSalary) ? 'better' : '_return';
+    endGame(s, key);
+    return { ended: s.ended, endKey: key, newSalary: s.newSalary };
+  }
+
+  function rejectOffer(s) {
+    if (!s.pendingOffer) return null;
+    s.stats.offersRejected++;
+    I.addTags(s, { gambler: 1 });
+    s.mentality = I.clamp(s.mentality - 4, 0, 100);
+    s.pendingOffer = null;
+    return { ended: false };
+  }
+
+  function endGame(s, key) {
+    if (s.ended) return;
+    s.ended = true;
+    s.endingKey = key;
+    s.endMonth = s.month;
+    s.phase = 'end';
+  }
+
+  function personality(s) {
+    var months = Math.max(1, s.planHistory.length);
+    var scores = {
+      gambler: (s.bigBets >= 2 ? CFG.personality.bonus.gamblerBigBets : 0) + s.bigBets * 2 + (s.tags.gambler || 0) + s.stats.offersRejected,
+      pragmatist: s.gigCount * 2 + s.huntCount + (s.tags.pragmatist || 0),
+      lyingFlat: s.restCount + (s.longestLyingStreak >= CFG.personality.lyingStreak ? CFG.personality.bonus.lyingStreak : 0) + (s.tags.lyingFlat || 0),
+      grinder: s.learnCount * 2 + (s.learnCount / months >= CFG.personality.grinderRatio ? CFG.personality.bonus.grinderRatio : 0) + (s.tags.grinder || 0),
+      minimalist: (s.tags.minimalist || 0),
+      waverer: (s.strategySwitches >= CFG.personality.wavererMinSwitches ? CFG.personality.bonus.wavererSwitches : 0) + s.strategySwitches + (s.tags.waverer || 0)
+    };
+    var keys = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; });
+    var composite = scores[keys[0]] - scores[keys[1]] < CFG.personality.compositeGap;
+    return { primary: keys[0], secondary: composite ? keys[1] : null, scores: scores, composite: composite };
+  }
+
+  function regret(s) {
+    var drawdown = s.initialCash > 0 ? (s.initialCash - s.stats.lowestCash) / s.initialCash : 0;
+    var r = 30;
+    if (s.stats.minMentality < 30) r += 20; else if (s.stats.minMentality < 50) r += 10;
+    if (drawdown > 0.6) r += 15; else if (drawdown > 0.3) r += 8;
+    r += Math.min(15, s.strategySwitches * 5);
+    if (s.endingKey === 'crash') r += 10;
+    if (s.endingKey === 'better') r -= 20;
+    return I.clamp(r, 5, 95);
+  }
+
+  function finish(s) {
+    if (!s.ended) endGame(s, 'fog');
+    var ENDINGS = global.LC.ENDINGS;
+    var key = s.endingKey === '_return' ? '_return' : s.endingKey;
+    var def = ENDINGS[key];
+    var p = personality(s);
+    var PER = global.LC.PERSONALITIES;
+    var pName = PER[p.primary].name + (p.secondary ? ' × ' + PER[p.secondary].name : '');
+    var roast = PER[p.primary].roast;
+    var stats = {
+      months: s.endMonth,
+      interviews: s.stats.interviews,
+      cashDrawdown: Math.max(0, s.initialCash - s.stats.lowestCash),
+      regret: regret(s)
+    };
+    return {
+      endingKey: key,
+      line: def.line,
+      title: def.titles[s.endMonth % def.titles.length],
+      text: def.text(s),
+      personality: p,
+      personalityName: pName,
+      roast: roast,
+      stats: stats,
+      salaryChange: s.employed && s.newSalary ? Math.round((s.newSalary / s.setup.salary - 1) * 100) : null
+    };
+  }
+
+  function toPlan(s) {
+    if (s.ended) return false;
+    if (s.eventChoiceTaken) { s.phase = 'plan'; return true; }
+    return false;
+  }
+
+  E.startMonth = startMonth;
+  E.choosePlan = choosePlan;
+  E.toPlan = toPlan;
+  E.acceptOffer = acceptOffer;
+  E.rejectOffer = rejectOffer;
+  E.personality = personality;
+  E.regret = regret;
+  E.finish = finish;
+  E.PLANS = PLANS;
+  E._endGame = endGame;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var CFG = global.LC.CONFIG;
+
+  var CITY_NOUN = { tier1: '一线城市', newtier: '新一线', hometown: '老家县城' };
+  var FAMILY_NOUN = { single: '一个人住', partner: '和伴侣一起', kid: '拉着一个娃' };
+  var GENDER_NOUN = { female: '女生', male: '男生', secret: '人' };
+
+  function makeOpening(setup) {
+    var wan = function (n) { return (n / 10000) >= 1 ? (n / 10000).toFixed(1).replace(/\.0$/, '') + ' 万' : n + ' 元'; };
+    var openings = [
+      setup.age + ' 岁，一个在' + CITY_NOUN[setup.city] + '打拼的' + GENDER_NOUN[setup.gender] +
+        '，' + FAMILY_NOUN[setup.family] + '，月薪 ' + setup.salary + '。某天晚上加完班，你看着工牌上的自己，突然觉得够了。第二天，你裸辞了。存款 ' +
+        wan(setup.savings) + '，是你全部的底气，也是你唯一的倒计时。',
+      '你在' + CITY_NOUN[setup.city] + '做了几年，' + (setup.age >= 33 ? '卡在三十好几' : '刚过二十五六') +
+        '，月薪 ' + setup.salary + '，' + FAMILY_NOUN[setup.family] + '。辞掉工作的那天下午，你走出写字楼，阳光刺得你眯起眼——上一次这个点出门，还是去医院。存款 ' + wan(setup.savings) + '，从今天起，每一分都有它的意义。',
+      '「提离职那天，我请自己吃了顿好的。」——你，' + setup.age + ' 岁，月薪 ' + setup.salary + '，' +
+        CITY_NOUN[setup.city] + '，存款 ' + wan(setup.savings) + '。' + FAMILY_NOUN[setup.family] +
+        '的日子并不便宜，但那一刻你觉得，人生第一次这么贵得值得。这一年，从今天开始算。'
+    ];
+    return openings[setup.age % openings.length];
+  }
+
+  function makeQuote() {
+    return global.LC.QUOTES[Math.floor(Math.random() * global.LC.QUOTES.length)];
+  }
+
+  function makeMontage(result, setup) {
+    var from = result.stats.months + 1;
+    var to = setup ? setup.months || 12 : 12;
+    var lines = [];
+    if (result.endingKey === 'better') {
+      lines.push('第 ' + from + ' 个月起：入职体检、走流程、领电脑，一切熟悉又陌生。');
+      lines.push('新同事问你怎么这么淡定，你笑笑：见过更难的局。');
+    } else if (result.endingKey === '_return') {
+      lines.push('工位还是那个工位，你把显示器垫高了两厘米——这次按你自己的意思。');
+      lines.push('有人等你出洋相，你没给机会；这一年练出的心态，办公室里学不到。');
+    } else if (result.endingKey === 'transform') {
+      lines.push('第一个月流水惨淡，第二个月老客带新客。');
+      lines.push('你把辞职信的截图，裱起来挂在了店里/工位上方。');
+    } else if (result.endingKey === 'fog') {
+      lines.push('有人问你打算千嘛，你第一次没有心虚。');
+      lines.push('你开始收拾简历，也收拾心情——不是退回原路，是往前探路。');
+    } else if (result.endingKey === 'crash') {
+      lines.push('你退掉房子，寄回行李，只背一个包上路。');
+      lines.push('这一局输了，但你知道了地图上哪里有坑。');
+    }
+    lines.push('到第 ' + to + ' 个月，这一年翻篇了。');
+    return lines;
+  }
+
+  function llmChat(prompt, fallback) {
+    if (!CFG.llm.enabled || !CFG.llm.url) return Promise.resolve(fallback());
+    return new Promise(function (resolve) {
+      var settled = false;
+      var done = function (val) { if (!settled) { settled = true; resolve(val || fallback()); } };
+      var timer = setTimeout(function () { done(null); }, CFG.llm.timeoutMs);
+      fetch(CFG.llm.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + CFG.llm.apiKey },
+        body: JSON.stringify({
+          model: CFG.llm.model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.9
+        })
+      }).then(function (r) { return r.json(); })
+        .then(function (j) {
+          clearTimeout(timer);
+          var txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+          done(txt && txt.trim());
+        })
+        .catch(function () { clearTimeout(timer); done(null); });
+    });
+  }
+
+  function opening(setup) {
+    return llmChat(
+      '用一两句话为以下人设写一个中文裸辞开场白，80字以内，语气克制、有画面感，不要鸡汤：' +
+      JSON.stringify({ age: setup.age, salary: setup.salary, savings: setup.savings, city: CITY_NOUN[setup.city] }),
+      function () { return makeOpening(setup); }
+    );
+  }
+
+  function endingQuote(result) {
+    return llmChat(
+      '为一个人生模拟游戏写一句中文金句，30字以内，要锋利但不说教，主题：裸辞与选择。游戏结局信息：' +
+      JSON.stringify({ line: result.line, personality: result.personalityName, regret: result.stats.regret }),
+      function () { return makeQuote(); }
+    );
+  }
+
+  global.LC = global.LC || {};
+  global.LC.Narrative = {
+    makeOpening: makeOpening,
+    makeQuote: makeQuote,
+    makeMontage: makeMontage,
+    opening: opening,
+    endingQuote: endingQuote
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var chars = String(text).split('');
+    var line = '', lines = [];
+    for (var i = 0; i < chars.length; i++) {
+      var test = line + chars[i];
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = chars[i]; }
+      else line = test;
+    }
+    if (line) lines.push(line);
+    for (var j = 0; j < lines.length; j++) ctx.fillText(lines[j], x, y + j * lineHeight);
+    return lines.length * lineHeight;
+  }
+
+  function render(canvas, result, setup) {
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+
+    ctx.fillStyle = '#fdf7ef';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#f2762e';
+    ctx.fillRect(0, 0, W, 12);
+    ctx.fillRect(0, H - 12, W, 12);
+
+    ctx.fillStyle = '#a2937f';
+    ctx.font = '600 32px "PingFang SC","Noto Sans SC",sans-serif';
+    ctx.fillText('裸 辞 模 拟 器', 80, 104);
+
+    ctx.fillStyle = '#d95f1f';
+    ctx.font = '700 30px sans-serif';
+    ctx.fillText('你的裸辞人格', 80, 192);
+
+    ctx.fillStyle = '#2f2721';
+    var nameSize = 70;
+    ctx.font = '800 ' + nameSize + 'px "Noto Serif SC","Songti SC","PingFang SC",serif';
+    var nameY = 290;
+    var nameLines = wrapText(ctx, result.personalityName, 80, nameY, W - 160, nameSize + 16);
+
+    ctx.fillStyle = '#a2937f';
+    ctx.font = '400 28px sans-serif';
+    var rarity = result.personality.composite ? '复合人格 · 比稀有更稀有' : '这一型，在人堆里一眼能认出来';
+    var rarityY = nameY + nameLines + 46;
+    ctx.fillText(rarity, 80, rarityY);
+
+    ctx.strokeStyle = '#eadccb';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(80, rarityY + 44);
+    ctx.lineTo(W - 80, rarityY + 44);
+    ctx.stroke();
+
+    ctx.fillStyle = '#6b5b4d';
+    ctx.font = 'italic 400 34px "Noto Serif SC","Songti SC","PingFang SC",serif';
+    var roastY = rarityY + 102;
+    var roastLines = wrapText(ctx, '「' + result.roast + '」', 80, roastY, W - 175, 54);
+
+    ctx.fillStyle = '#b4a58f';
+    ctx.font = '600 25px sans-serif';
+    ctx.fillText('—— 这一年 ——', 80, roastY + roastLines + 54);
+
+    ctx.fillStyle = '#33281f';
+    ctx.font = '700 40px sans-serif';
+    var statY = roastY + roastLines + 116;
+    ctx.fillText('扛了 ' + result.stats.months + ' 个月', 80, statY);
+    ctx.fillText('面试 ' + result.stats.interviews + ' 次', 80, statY + 62);
+    var dd = result.stats.cashDrawdown / 10000;
+    var ddTxt = dd >= 1 ? dd.toFixed(1) + ' 万' : Math.round(result.stats.cashDrawdown) + ' 元';
+    ctx.fillStyle = '#6b5b4d';
+    ctx.fillText('存款最大回落 ' + ddTxt, 80, statY + 124);
+    ctx.fillStyle = '#d95f1f';
+    ctx.fillText('后悔指数 ' + result.stats.regret, 80, statY + 186);
+
+    var endY = statY + 274;
+    ctx.fillStyle = '#b4a58f';
+    ctx.font = '600 25px sans-serif';
+    ctx.fillText('—— 结局 · ' + result.line + ' ——', 80, endY);
+    ctx.fillStyle = '#2f2721';
+    ctx.font = '700 36px "Noto Serif SC","Songti SC","PingFang SC",serif';
+    wrapText(ctx, result.title, 80, endY + 60, W - 160, 50);
+
+    ctx.fillStyle = '#8f7f6b';
+    ctx.font = 'italic 400 28px "Noto Serif SC","Songti SC",serif';
+    var quoteY = Math.min(endY + 212, H - 368);
+    wrapText(ctx, '"' + result.quote + '"', 80, quoteY, W - 175, 46);
+
+    ctx.strokeStyle = '#e5d5c0';
+    ctx.strokeRect(80, H - 216, 104, 104);
+    ctx.fillStyle = '#c0b09a';
+    ctx.font = '400 18px sans-serif';
+    ctx.fillText('二维码', 106, H - 160);
+    ctx.fillStyle = '#33281f';
+    ctx.font = '600 24px sans-serif';
+    ctx.fillText('我替你活了一遍辞职后的那一年', 208, H - 172);
+    ctx.fillStyle = '#a2937f';
+    ctx.fillText('你也来试试？', 208, H - 136);
+
+    return canvas.toDataURL('image/png');
+  }
+
+  global.LC = global.LC || {};
+  global.LC.Card = { render: render };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function (global) {
+  'use strict';
+
+  var doc = global.document;
+  var $ = function (id) { return doc.getElementById(id); };
+  var Engine = global.LC.Engine;
+  var Narrative = global.LC.Narrative;
+
+  var ui = {
+    state: null,
+    setup: null,
+    result: null,
+    introDone: false,
+    quoteText: ''
+  };
+
+  var BOUNDS = {
+    'in-age': [22, 40, 1],
+    'in-salary': [3000, 80000, 1000],
+    'in-savings': [1000, 500000, 5000]
+  };
+
+  function showScreen(id) {
+    var screens = doc.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+    $(id).classList.add('active');
+    global.scrollTo(0, 0);
+  }
+
+  function segValue(segId) {
+    var sel = doc.querySelector('#' + segId + ' .seg-btn.selected');
+    return sel ? sel.dataset.value : null;
+  }
+
+  function setSeg(segId, value) {
+    var btns = doc.querySelectorAll('#' + segId + ' .seg-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('selected', btns[i].dataset.value === value);
+    }
+  }
+
+  function numVal(id) {
+    var b = BOUNDS[id];
+    var v = parseInt($(id).value, 10);
+    if (isNaN(v)) v = b[0];
+    return Math.max(b[0], Math.min(b[1], v));
+  }
+
+  function readSetup() {
+    return {
+      age: numVal('in-age'),
+      salary: numVal('in-salary'),
+      savings: numVal('in-savings'),
+      gender: segValue('seg-gender') || 'secret',
+      housing: segValue('seg-housing'),
+      family: segValue('seg-family'),
+      city: segValue('seg-city')
+    };
+  }
+
+  function writeSetup(s) {
+    $('in-age').value = s.age;
+    $('in-salary').value = s.salary;
+    $('in-savings').value = s.savings;
+    setSeg('seg-gender', s.gender);
+    setSeg('seg-housing', s.housing);
+    setSeg('seg-family', s.family);
+    setSeg('seg-city', s.city);
+    previewBurn();
+  }
+
+  function fmtWan(n) {
+    var v = Math.abs(n) / 10000;
+    return (v >= 1 ? (v >= 10 ? Math.round(v) : v.toFixed(1).replace(/\.0$/, '')) + ' 万' : Math.round(Math.abs(n)) + ' 元');
+  }
+
+  function previewBurn() {
+    var s = readSetup();
+    var tmp = { setup: s, burnMods: [], frugalMonths: 0 };
+    var burn = Engine.burnRate(tmp);
+    var months = burn > 0 ? Math.floor(s.savings / burn) : 99;
+    $('savings-hint').textContent = '约 ' + months + ' 个月刚性支出';
+    $('burn-preview').innerHTML =
+      '每月固定支出约 <b>' + burn.toLocaleString() + ' 元</b>，你的存款能撑 <b>' +
+      Math.min(months, 99) + ' 个月</b>（一分钱进项都没有的前提下）。';
+  }
+
+  function clampInput(id) {
+    var b = BOUNDS[id];
+    var v = parseInt($(id).value, 10);
+    if (isNaN(v)) v = b[0];
+    v = Math.max(b[0], Math.min(b[1], v));
+    var step = b[2];
+    v = Math.round(v / step) * step;
+    $(id).value = v;
+    return v;
+  }
+
+  function bindNumberInputs() {
+    Object.keys(BOUNDS).forEach(function (id) {
+      $(id).addEventListener('input', previewBurn);
+      $(id).addEventListener('change', function () { clampInput(id); previewBurn(); });
+      $(id).addEventListener('blur', function () { clampInput(id); previewBurn(); });
+    });
+
+    var steps = doc.querySelectorAll('.step-btn');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].addEventListener('click', function () {
+        var id = this.dataset.step;
+        var dir = parseInt(this.dataset.dir, 10);
+        var b = BOUNDS[id];
+        var v = clampInput(id) + dir * b[2];
+        v = Math.max(b[0], Math.min(b[1], v));
+        $(id).value = v;
+        previewBurn();
+      });
+    }
+  }
+
+  function bindSegments() {
+    ['seg-gender', 'seg-housing', 'seg-family', 'seg-city'].forEach(function (segId) {
+      var btns = doc.querySelectorAll('#' + segId + ' .seg-btn');
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener('click', function () {
+          setSeg(segId, this.dataset.value);
+          previewBurn();
+        });
+      }
+    });
+  }
+
+  function randomSetup() {
+    var r = function (min, max, step) { return min + Math.round(Math.random() * (max - min) / step) * step; };
+    var pick = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+    writeSetup({
+      age: r(22, 40, 1),
+      salary: r(5, 45, 1) * 1000,
+      savings: r(1, 40, 1) * 10000,
+      gender: pick(['female', 'male', 'female', 'male', 'secret']),
+      housing: pick(['none', 'rent', 'rent', 'mortgage']),
+      family: pick(['single', 'single', 'partner', 'kid']),
+      city: pick(['tier1', 'newtier', 'hometown'])
+    });
+  }
+
+  function bindSetup() {
+    bindNumberInputs();
+    bindSegments();
+    $('btn-random').addEventListener('click', randomSetup);
+    $('btn-reroll-inherit').addEventListener('click', randomSetup);
+    $('btn-start').addEventListener('click', startGame);
+    previewBurn();
+  }
+
+  function parseShareParams() {
+    var q = {};
+    global.location.search.replace(/([a-z]+)=([^&]+)/g, function (_, k, v) { q[k] = decodeURIComponent(v); });
+    if (!q.age && !q.salary) return;
+    var num = function (v, min, max, dft) {
+      var n = parseInt(v, 10);
+      if (isNaN(n)) return dft;
+      return Math.max(min, Math.min(max, n));
+    };
+    var oneOf = function (v, list, dft) { return list.indexOf(v) >= 0 ? v : dft; };
+    writeSetup({
+      age: num(q.age, 22, 40, 28),
+      salary: num(q.salary, 3000, 80000, 15000),
+      savings: num(q.savings, 1000, 500000, 80000),
+      gender: oneOf(q.gender, ['female', 'male', 'secret'], 'secret'),
+      housing: oneOf(q.housing, ['none', 'rent', 'mortgage'], 'rent'),
+      family: oneOf(q.family, ['single', 'partner', 'kid'], 'single'),
+      city: oneOf(q.city, ['tier1', 'newtier', 'hometown'], 'tier1')
+    });
+    $('share-banner').classList.remove('hidden');
+    $('share-banner-text').textContent = '朋友把他的人设扔给了你：同一起点，不同人生。';
+  }
+
+  function startGame() {
+    var setup = readSetup();
+    ui.setup = setup;
+    ui.state = Engine.create(setup);
+    ui.introDone = false;
+    showScreen('screen-game');
+    showIntro();
+  }
+
+  function renderStatus() {
+    var s = ui.state;
+    $('month-tag').textContent = s.month === 0 ? '开局' : '第 ' + s.month + ' / ' + s.MONTHS + ' 个月';
+    var tag = $('cash-tag');
+    tag.textContent = '存款 ' + fmtWan(s.cash);
+    tag.classList.toggle('danger', s.cash < 0);
+    $('out-mentality').textContent = s.mentality;
+    var mb = $('bar-mentality');
+    mb.style.width = s.mentality + '%';
+    mb.className = 'bar-fill mentality ' + (s.mentality < 30 ? 'danger' : s.mentality < 50 ? 'warn' : '');
+    $('out-comp').textContent = s.comp;
+    $('bar-comp').style.width = s.comp + '%';
+    renderDots('progress-dots', s.month - 1);
+  }
+
+  function renderDots(containerId, doneCount) {
+    var box = $(containerId);
+    if (!box) return;
+    box.innerHTML = '';
+    for (var i = 0; i < ui.state.MONTHS; i++) {
+      var d = doc.createElement('div');
+      d.className = 'pdot' + (i < doneCount ? ' done' : '');
+      box.appendChild(d);
+    }
+  }
+
+  function showIntro() {
+    renderStatus();
+    $('event-cat').className = 'event-cat';
+    $('event-cat').textContent = '开场';
+    $('event-title').textContent = '';
+    $('event-text').textContent = Narrative.makeOpening(ui.setup);
+    $('choice-area').innerHTML = '';
+    var btn = mkBtn('开始这一年 →', 'btn primary wide');
+    btn.addEventListener('click', function () {
+      ui.introDone = true;
+      beginMonth();
+    });
+    $('choice-area').appendChild(btn);
+  }
+
+  function beginMonth() {
+    var s = ui.state;
+    var ev = Engine.startMonth(s);
+    renderStatus();
+    var catEl = $('event-cat');
+    if (ev) {
+      catEl.className = 'event-cat cat-' + ev.cat;
+      catEl.textContent = catName(ev.cat);
+      $('event-title').textContent = ev.title;
+      $('event-text').textContent = ev.text;
+      if (ev.choice) renderEventChoices(ev);
+      else renderPlanChoices();
+    } else {
+      catEl.className = 'event-cat';
+      catEl.textContent = '平常的一天';
+      $('event-title').textContent = '这个月没什么大事';
+      $('event-text').textContent = '日子像温水，不烫也不凉。时间往前走，你得决定怎么用。';
+      renderPlanChoices();
+    }
+  }
+
+  function catName(cat) {
+    return { job: '求职', gig: '搞钱', boom: '风口', family: '家庭', accident: '意外', social: '社交' }[cat] || '生活';
+  }
+
+  function mkBtn(label, cls) {
+    var b = doc.createElement('button');
+    b.className = cls || 'btn soft wide';
+    b.textContent = label;
+    return b;
+  }
+
+  function renderEventChoices(ev) {
+    var area = $('choice-area');
+    area.innerHTML = '';
+    ev.choice.options.forEach(function (opt, i) {
+      var wrap = doc.createElement('div');
+      wrap.className = 'choice';
+      var b = mkBtn(opt.label, 'btn soft wide');
+      b.style.textAlign = 'left';
+      wrap.appendChild(b);
+      if (opt.note) {
+        var note = doc.createElement('div');
+        note.className = 'choice-note';
+        note.textContent = opt.note;
+        wrap.appendChild(note);
+      }
+      b.addEventListener('click', function () {
+        var r = Engine.resolveEvent(ui.state, i);
+        if (r && r.ended) { showEnd(); return; }
+        renderPlanChoices();
+      });
+      area.appendChild(wrap);
+    });
+  }
+
+  function renderPlanChoices() {
+    var s = ui.state;
+    if (!Engine.toPlan(s)) return;
+    var area = $('choice-area');
+    area.innerHTML = '';
+    var head = doc.createElement('div');
+    head.className = 'plan-head';
+    head.textContent = '· 这个月，你主要干什么 ·';
+    area.appendChild(head);
+    Object.keys(Engine.PLANS).forEach(function (pid) {
+      var p = Engine.PLANS[pid];
+      var wrap = doc.createElement('div');
+      wrap.className = 'choice';
+      var b = mkBtn(p.label, 'btn soft wide');
+      b.style.textAlign = 'left';
+      var note = doc.createElement('div');
+      note.className = 'choice-note';
+      note.textContent = p.desc;
+      wrap.appendChild(b); wrap.appendChild(note);
+      b.addEventListener('click', function () { doPlan(pid); });
+      area.appendChild(wrap);
+    });
+  }
+
+  function doPlan(pid) {
+    var report = Engine.choosePlan(ui.state, pid);
+    showReport(report);
+  }
+
+  function showReport(report) {
+    showScreen('screen-report');
+    $('report-month-tag').textContent = '第 ' + report.month + ' / ' + ui.state.MONTHS + ' 个月 · 月报';
+    renderDots('report-progress-dots', report.month);
+    $('report-title').textContent = '「' + (Engine.PLANS[report.plan] ? Engine.PLANS[report.plan].label : '突发事件') + '」的一个月';
+    var lines = $('report-lines');
+    lines.innerHTML = '';
+    report.lines.forEach(function (t) {
+      var d = doc.createElement('div');
+      d.className = 'report-line';
+      d.textContent = t;
+      lines.appendChild(d);
+    });
+    var s = ui.state;
+    $('report-status').innerHTML =
+      '存款 <b>' + fmtWan(s.cash) + '</b> ・ 心态 <b>' + s.mentality + '</b> ・ 竞争力 <b>' + s.comp + '</b>' +
+      (s.pendingBet ? '<br>一笔押注在桌上（' + fmtWan(s.pendingBet.stake) + '），下个月开奖' : '');
+
+    var nextArea = $('btn-next-month');
+    nextArea.style.display = report.offer ? 'none' : '';
+    nextArea.textContent = report.ended ? '看看这一年 →' : '下个月 →';
+
+    if (report.offer) {
+      var q = doc.createElement('div');
+      q.className = 'offer-box';
+      q.textContent = 'offer：' + report.offer.toLocaleString() + ' 元/月（原工资的 ' + Math.round(report.offer / ui.setup.salary * 100) + '%）';
+      lines.appendChild(q);
+      var row = doc.createElement('div');
+      row.className = 'offer-actions';
+      var acc = mkBtn('接了，先上岸', 'btn primary');
+      var rej = mkBtn('拒绝，再等等', 'btn soft');
+      acc.addEventListener('click', function () {
+        Engine.acceptOffer(ui.state);
+        showEnd();
+      });
+      rej.addEventListener('click', function () {
+        Engine.rejectOffer(ui.state);
+        nextArea.style.display = '';
+        q.remove(); row.remove();
+        alertMsg('拒了。心态 -4，你赌后面有更好的。');
+      });
+      row.appendChild(acc); row.appendChild(rej);
+      lines.appendChild(row);
+    }
+  }
+
+  function alertMsg(t) {
+    var d = doc.createElement('div');
+    d.className = 'toast';
+    d.textContent = t;
+    doc.body.appendChild(d);
+    setTimeout(function () { d.remove(); }, 2400);
+  }
+
+  $('btn-next-month').addEventListener('click', function () {
+    if (ui.state.ended) { showEnd(); return; }
+    showScreen('screen-game');
+    beginMonth();
+  });
+
+  function showEnd() {
+    var s = ui.state;
+    var result = Engine.finish(s);
+    ui.result = result;
+    showScreen('screen-end');
+    $('end-line').textContent = '结局 · ' + result.line;
+    $('end-title').textContent = result.title;
+    $('end-text').textContent = result.text;
+
+    var mg = $('montage');
+    mg.innerHTML = '';
+    if (result.stats.months < s.MONTHS) {
+      Narrative.makeMontage(result, { months: s.MONTHS }).forEach(function (t) {
+        var d = doc.createElement('div');
+        d.className = 'montage-line';
+        d.textContent = t;
+        mg.appendChild(d);
+      });
+    }
+
+    $('p-name').textContent = result.personalityName;
+    $('p-roast').textContent = '「' + result.roast + '」';
+    $('p-rarity').textContent = result.personality.composite ? '复合人格 · 比稀有更稀有' : '在裸辞人群里，你是很有辨识度的一型';
+
+    var salary = result.salaryChange === null ? '没有新工资' :
+      (result.salaryChange >= 0 ? '新工资 +' : '新工资 ') + result.salaryChange + '%';
+    $('end-stats').innerHTML =
+      '扛了 <b>' + result.stats.months + '</b> 个月 ・ 面试 <b>' + result.stats.interviews +
+      '</b> 次<br>存款最大回落 <b>' + fmtWan(result.stats.cashDrawdown) + '</b> ・ 后悔指数 <b>' +
+      result.stats.regret + '</b><br>' + salary;
+
+    $('end-quote').textContent = '“' + (ui.quoteText || '后悔是裸辞的售后服务，每人一份，无法退货。') + '”';
+    Narrative.endingQuote(result).then(function (q) {
+      ui.quoteText = q;
+      $('end-quote').textContent = '“' + q + '”';
+    });
+
+    $('card-area').classList.add('hidden');
+  }
+
+  $('btn-card').addEventListener('click', function () {
+    var result = ui.result;
+    result.quote = ui.quoteText || '后悔是裸辞的售后服务，每人一份，无法退货。';
+    var canvas = $('card-canvas');
+    var dataUrl = global.LC.Card.render(canvas, result, ui.setup);
+    $('card-download').href = dataUrl;
+    $('card-area').classList.remove('hidden');
+    $('card-area').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  $('btn-replay').addEventListener('click', function () {
+    showScreen('screen-setup');
+  });
+
+  $('btn-share-link').addEventListener('click', function () {
+    var s = ui.setup;
+    var base = global.location.href.split('?')[0].split('#')[0];
+    var url = base + '?age=' + s.age + '&salary=' + s.salary + '&savings=' + s.savings +
+      '&gender=' + s.gender + '&housing=' + s.housing + '&family=' + s.family + '&city=' + s.city;
+    var fallback = function () {
+      var ta = doc.createElement('textarea');
+      ta.value = url; doc.body.appendChild(ta); ta.select();
+      doc.execCommand('copy'); ta.remove();
+      alertMsg('链接已复制。同一起点，看谁活得漂亮。');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        alertMsg('链接已复制。同一起点，看谁活得漂亮。');
+      }, fallback);
+    } else fallback();
+  });
+
+  global.LC.UI = ui;
+  bindSetup();
+  parseShareParams();
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script type="text/javascript" src="/accessproxy_statics/h5_fp.js" defer></script>
+<script type="text/javascript" src="/accessproxy_statics/wm.js" defer></script>
+</body>
+</html>
