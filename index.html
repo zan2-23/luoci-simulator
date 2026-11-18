@@ -163,10 +163,10 @@ b { color: var(--accent-deep); font-weight: 700; }
 .share-banner span { display: block; margin-bottom: 4px; }
 
 /* ---------- 月度推演 ---------- */
-.game-header { padding: 4px 0 16px; }
+.game-header { padding: 0 0 10px; }
 .month-row { display: flex; justify-content: space-between; align-items: baseline; }
-.month-label { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 1px; }
-.cash-tag { font-size: 22px; font-weight: 800; color: var(--ink); }
+.month-label { font-size: 12.5px; color: var(--muted); font-weight: 600; letter-spacing: .5px; line-height: 1.45; padding-right: 10px; }
+.cash-tag { font-size: 20px; font-weight: 800; color: var(--ink); white-space: nowrap; flex: none; }
 .cash-tag.danger { color: var(--red); }
 
 .progress-dots { display: flex; gap: 5px; margin-top: 10px; }
@@ -174,10 +174,13 @@ b { color: var(--accent-deep); font-weight: 700; }
 .pdot.done { background: var(--accent); }
 
 .status-panels {
-  display: flex; gap: 12px; margin-bottom: 20px;
-  background: var(--card); border: 1.5px solid var(--line);
-  border-radius: 18px; padding: 14px 16px;
+  display: flex; gap: 14px; margin-bottom: 10px;
+  background: transparent; border: 0; border-radius: 0; padding: 0;
 }
+.stat { flex: 1; }
+.stat-label { font-size: 11px; }
+.stat-label output { font-size: 13px; }
+.bar { height: 5px; }
 .stat { flex: 1; }
 .stat-label {
   display: flex; justify-content: space-between; align-items: baseline;
@@ -210,9 +213,10 @@ b { color: var(--accent-deep); font-weight: 700; }
 .event-card h3 { font-size: 21px; font-weight: 800; margin-bottom: 10px; line-height: 1.4; }
 .event-card p { font-size: 15px; color: var(--ink-soft); }
 
-.choice { margin-bottom: 12px; }
-.choice .btn { text-align: left; padding: 16px 18px; border-radius: 16px; }
-.choice-note { font-size: 12px; color: var(--muted); margin-top: 6px; padding-left: 6px; }
+.choice { margin-bottom: 9px; }
+.choice .btn { text-align: left; padding: 13px 16px; border-radius: 14px; }
+.choice-note { font-size: 11.5px; color: var(--muted); margin-top: 5px; padding-left: 6px; line-height: 1.5; }
+.plan-head { margin: 10px 0 8px; }
 .plan-head {
   font-size: 14px; color: var(--ink-soft); text-align: center;
   margin: 6px 0 14px; font-weight: 700; letter-spacing: 1px;
@@ -363,7 +367,8 @@ b { color: var(--accent-deep); font-weight: 700; }
 .event-result div + div { margin-top: 2px; }
 
 /* ===== v3 对话流 ===== */
-.chat { display: flex; flex-direction: column; gap: 12px; margin: 20px 0 8px; }
+.chat { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 8px; }
+.msg, .notebook { scroll-margin-top: 16px; }
 .msg.sys { text-align: center; font-size: 12.5px; color: var(--muted); line-height: 1.7; padding: 0 12px; }
 .msg.axan { align-self: flex-start; max-width: 88%; }
 .msg.axan .who { font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--accent-deep); margin: 0 0 5px 4px; }
@@ -414,6 +419,7 @@ b { color: var(--accent-deep); font-weight: 700; }
   background: var(--accent-soft); color: var(--accent-deep);
   border-radius: 50%; font-size: 11px; font-weight: 800;
 }
+.prune { text-align: center; font-size: 12px; color: var(--muted); padding: 4px 0; letter-spacing: .02em; }
 
 </style>
 </head>
@@ -2005,8 +2011,13 @@ b { color: var(--accent-deep); font-weight: 700; }
           { label: '什么都不说', trust: -2, effects: { mentality: -2 }, reply: function () { return [A('行吧。我等你准备好。快的话三周，慢的话——就说不准了。')]; } }
         ]
       },
-      planPrompt: '第一周，你打算怎么过？',
-      plans: ['rest', 'learn', 'hunt']
+      planPrompt: '第一周，你先干什么？',
+      plans: [
+        { plan: 'hunt', label: '今天就开始改简历，明天投出去', hint: 'gap 头三个月，HR 最愿意约你' },
+        { plan: 'rest', label: '先睡三天，手机关静音', hint: '心态回升，但存款不会停' },
+        { plan: 'learn', label: '报个课，把技能补齐', hint: '花 500 元，竞争力 +4' },
+        { plan: 'gig', label: '问问朋友有没有零活', hint: '每月回血一部分，竞争力 -1' }
+      ]
     },
 
     {
@@ -2024,10 +2035,12 @@ b { color: var(--accent-deep); font-weight: 700; }
           { label: '不想谈钱', trust: -3, effects: { mentality: -2 }, reply: function () { return [A('钱不谈，它也会自己找上门。')]; } }
         ]
       },
-      planPrompt: '接下来两个月，钱和时间怎么花？',
-      plans: ['hunt', 'gig', 'rest'],
-      extraPlans: [
-        { label: '记账节流，砍掉一切非必需', hint: '这两个月支出压到七折，但日子会很紧', plan: 'rest', effects: { frugalMonths: 2 } }
+      planPrompt: '这两个月，钱和时间怎么花？',
+      plans: [
+        { plan: 'rest', label: '把订阅全退了，外卖改做饭', hint: '支出压到七折，日子会很紧', effects: { frugalMonths: 2 } },
+        { plan: 'hunt', label: '继续海投，一周二十份', hint: '面试机会靠量堆，但心态会磨损' },
+        { plan: 'gig', label: '接私活，先让现金流动起来', hint: '每月回血，但简历上多一段「不相关」' },
+        { plan: 'learn', label: '闭关两个月，赌一个更好的岗', hint: '花 500 元/月，竞争力 +4' }
       ]
     },
 
@@ -2047,8 +2060,12 @@ b { color: var(--accent-deep); font-weight: 700; }
           { label: '不去，编了个理由', trust: -1, effects: { mentality: -2 }, reply: function () { return [A('躲得过饭局，躲不过「他们是不是觉得我混得不好」这个念头。')]; } }
         ]
       },
-      planPrompt: '这个月你怎么过？',
-      plans: ['hunt', 'gig', 'rest']
+      planPrompt: '散场之后，这个月把力气放哪儿？',
+      plans: [
+        { plan: 'hunt', label: '顺着饭桌上那条线，去要内推', hint: '内推的通过率是海投的几倍' },
+        { plan: 'gig', label: '先接点散活，别让手生', hint: '回血，但专业度会慢慢掉' },
+        { plan: 'rest', label: '什么都不干，先把心态养回来', hint: '饭局上的话还在心里转' }
+      ]
     },
 
     {
@@ -2085,8 +2102,12 @@ b { color: var(--accent-deep); font-weight: 700; }
           ]
         };
       },
-      planPrompt: '这个月你怎么过？',
-      plans: ['hunt', 'gig', 'learn']
+      planPrompt: '这个月怎么打？',
+      plans: [
+        { plan: 'hunt', label: '按新的说法，重投一轮', hint: '把「为什么离开」讲成一句能背下来的话' },
+        { plan: 'learn', label: '把 gap 期间做的事整理成作品', hint: '面试官要的是名词，不是心情' },
+        { plan: 'gig', label: '接零活，顺便攒案例', hint: '有钱进账，也有东西可讲' }
+      ]
     },
 
     {
@@ -2119,8 +2140,12 @@ b { color: var(--accent-deep); font-weight: 700; }
           { label: '岔开话题', trust: -1, effects: { mentality: -1 }, reply: function () { return [A('岔开一次，下次她就不问了。不问，不等于不担心。')]; } }
         ]
       },
-      planPrompt: '这个月你怎么过？',
-      plans: ['hunt', 'gig', 'rest']
+      planPrompt: '家里的问题绕不开，这个月怎么过？',
+      plans: [
+        { plan: 'hunt', label: '把面试约满，用忙碌盖住家里的问号', hint: '让家人看到你在动，也是一种交代' },
+        { plan: 'rest', label: '先顾家，工作的事放一放', hint: '心态 +6，但时间在走' },
+        { plan: 'gig', label: '接点能在家做的活', hint: '既能陪家人，也有钱进账' }
+      ]
     },
 
     {
@@ -2139,8 +2164,17 @@ b { color: var(--accent-deep); font-weight: 700; }
           { label: '我自己都一团糟，别问我', trust: -3, effects: { mentality: -2 }, flags: { axanTook: false }, reply: function () { return [A('嗯。也是。'), S('她把另一罐咖啡放回包里，说本来是想给你的。')]; } }
         ]
       },
-      planPrompt: '接下来两个月，你打算怎么过？',
-      plans: ['hunt', 'gig', 'learn']
+      planPrompt: function (s) {
+        return s.flags.axanTook
+          ? '阿岸下周一入职。她的战场上插了旗，你这块还是空的——两个月，怎么打？'
+          : '阿岸没接，说要再等等。她还在跑，你呢——这两个月怎么打？';
+      },
+      plans: [
+        { plan: 'hunt', label: '按原价继续投，一分不让', hint: '不降标准，但空窗每多一个月，议价能力就少一分' },
+        { plan: 'hunt', label: '开始看降两成的岗', hint: '降薪是暂时的；先让工资条回来', effects: { comp: 1, offerBuff: { value: 0.06, months: 2 } } },
+        { plan: 'gig', label: '学阿岸的路子，先接陪跑/零活', hint: '现金流能续着，但专业线会偏' },
+        { plan: 'learn', label: '考证，把简历上的空白填上', hint: '花 500 元/月，竞争力 +4——两个月后拿出来给人看' }
+      ]
     },
 
     {
@@ -2148,6 +2182,9 @@ b { color: var(--accent-deep); font-weight: 700; }
       lines: function (s) {
         return [
           S('阿岸把两张纸摊在桌上，一张是你的账，一张是她的。'),
+          s.flags.axanTook
+            ? S('她现在每天挤地铁上下班。晚上会发一句：今天投了几份？')
+            : S('她的纸上是零活的流水，乱七八糟但一直在动。'),
           A('按你现在的烧法，还有 ' + runway(s) + ' 个月。我的建议是这个月之内，把「体面」和「坚持」分开算。'),
           A('要不要降低标准？')
         ];
@@ -2159,10 +2196,14 @@ b { color: var(--accent-deep); font-weight: 700; }
           { label: '开始认真考虑回老家', trust: 2, effects: { mentality: 3 }, flags: { hometownThread: true }, reply: function (s) { return [A('回' + (s.setup.hometownName || '老家') + '不丢人。我有三个客户最后都回去了，两个现在过得比留下的人好。')]; } }
         ]
       },
-      planPrompt: '这个月你怎么过？',
-      plans: ['hunt', 'gig', 'rest'],
+      planPrompt: '这个月，钱和时间往哪儿放？',
+      plans: [
+        { plan: 'hunt', label: '降标准，先上岸再说', hint: '降薪接 offer，先把工资条救回来' },
+        { plan: 'gig', label: '接零活，撑到年底', hint: '每月回血，但简历上会多一段「杂」' },
+        { plan: 'learn', label: '最后冲一次，报个短训', hint: '花 500 元，竞争力 +4，赌年后的岗' }
+      ],
       extraPlans: [
-        { label: '回老家待一阵，重新算账', hint: '开支骤降，但节奏会慢下来', plan: 'rest', effects: { mentality: 4, comp: -2, hometownThread: true } }
+        { label: '回老家待一个月，把账重算', hint: '开支骤降，但节奏会慢下来', plan: 'rest', effects: { mentality: 4, comp: -2, hometownThread: true } }
       ]
     },
 
@@ -2171,12 +2212,20 @@ b { color: var(--accent-deep); font-weight: 700; }
       lines: function (s) {
         return [
           S('年底了。招聘软件的年终盘点推送，像在提醒你这一年干了什么。'),
+          s.flags.axanTook
+            ? S('阿岸已经上了三个月班。她的年终总结只写了四个字：先活下来。')
+            : S('阿岸的陪跑做到第三单，有人开始主动找她。'),
           A('接下来两个月，所有的「以后」都会兑现，或者落空。'),
           A('最后一程，你想怎么走？')
         ];
       },
-      planPrompt: '最后两个月，你怎么过？',
-      plans: ['hunt', 'gig', 'learn', 'rest']
+      planPrompt: '最后两个月，你怎么走？',
+      plans: [
+        { plan: 'hunt', label: '全力投，一天三场面试', hint: '把最后两个月当成冲刺' },
+        { plan: 'gig', label: '把手上的零活做成稳定收入', hint: '先把现金稳住，年后再议' },
+        { plan: 'learn', label: '闭关到年后，赌春招', hint: '花 500 元/月，竞争力 +4' },
+        { plan: 'rest', label: '认了，先过个安稳年', hint: '心态回升，但这一年就这样收尾' }
+      ]
     }
   ];
 
@@ -2548,6 +2597,7 @@ b { color: var(--accent-deep); font-weight: 700; }
     ui.setup = setup;
     ui.state = Engine.create(setup);
     ui.sceneIdx = 0;
+    ui.used = {};
     $('chat').innerHTML = '';
     showScreen('screen-game');
     nextScene();
@@ -2555,9 +2605,27 @@ b { color: var(--accent-deep); font-weight: 700; }
 
   // ================= 对话流 =================
 
-  function scrollChat() {
+  function pruneOne() {
     var box = $('chat');
-    if (box && box.lastChild) box.lastChild.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    var nodes = [].filter.call(box.children, function (n) { return !n.classList.contains('prune'); });
+    if (nodes.length <= 2) return false;
+    nodes[0].remove();
+    if (!box.querySelector('.prune')) {
+      var p = doc.createElement('div');
+      p.className = 'prune';
+      p.textContent = '…… 更早的对话，阿岸已经记在账本里了';
+      box.insertBefore(p, box.firstChild);
+    }
+    return true;
+  }
+
+  function settleView() {
+    global.scrollTo(0, 0);
+    var guard = 0;
+    while (doc.documentElement.scrollHeight > global.innerHeight + 2 && guard++ < 12) {
+      if (!pruneOne()) break;
+    }
+    global.scrollTo(0, 0);
   }
 
   function pushBubble(item) {
@@ -2583,7 +2651,6 @@ b { color: var(--accent-deep); font-weight: 700; }
       d.appendChild(who); d.appendChild(b);
     }
     box.appendChild(d);
-    scrollChat();
   }
 
   function pushNotebook(lines) {
@@ -2600,7 +2667,6 @@ b { color: var(--accent-deep); font-weight: 700; }
       box.appendChild(d);
     });
     $('chat').appendChild(box);
-    scrollChat();
   }
 
   function renderStatus() {
@@ -2688,11 +2754,13 @@ b { color: var(--accent-deep); font-weight: 700; }
     if (s.ended) { showEnd(); return; }
     var scene = Scenes[ui.sceneIdx];
     if (!scene) { showEnd(); return; }
+
     renderStatus();
     var lines = typeof scene.lines === 'function' ? scene.lines(s) : (scene.lines || []);
     lines.forEach(pushBubble);
     if (scene.tone) renderTone(scene);
     else renderPlans(scene);
+    settleView();
   }
 
   function renderTone(scene) {
@@ -2712,14 +2780,15 @@ b { color: var(--accent-deep); font-weight: 700; }
       b.style.textAlign = 'left';
       wrap.appendChild(b);
       b.addEventListener('click', function () {
+
         applyTone(opt);
         var reply = typeof opt.reply === 'function' ? opt.reply(s) : (opt.reply || []);
         reply.forEach(pushBubble);
         renderPlans(scene);
+        settleView();
       });
       area.appendChild(wrap);
     });
-    scrollChat();
   }
 
   function renderPlans(scene) {
@@ -2733,10 +2802,20 @@ b { color: var(--accent-deep); font-weight: 700; }
     area.appendChild(head);
 
     var options = [];
-    (scene.plans || ['hunt', 'gig', 'learn', 'rest']).forEach(function (pid) {
-      options.push({ plan: pid, label: Engine.PLANS[pid].label, hint: planDesc(pid, s) });
+    (scene.plans || ['hunt', 'gig', 'learn', 'rest']).forEach(function (p) {
+      if (typeof p === 'string') {
+        options.push({ plan: p, label: Engine.PLANS[p].label, hint: planDesc(p, s) });
+      } else {
+        options.push({
+          plan: p.plan,
+          label: p.label,
+          hint: typeof p.hint === 'function' ? p.hint(s) : (p.hint || planDesc(p.plan, s)),
+          effects: p.effects
+        });
+      }
     });
     (scene.extraPlans || []).forEach(function (x) { options.push(x); });
+    options = options.filter(function (o) { return !ui.used[o.label]; });
 
     options.forEach(function (o) {
       var wrap = doc.createElement('div');
@@ -2748,13 +2827,15 @@ b { color: var(--accent-deep); font-weight: 700; }
       note.textContent = o.hint || planDesc(o.plan, s);
       wrap.appendChild(b); wrap.appendChild(note);
       b.addEventListener('click', function () {
+
         pushBubble({ t: 'me', text: '（这个月：' + o.label + '）' });
+        ui.used[o.label] = 1;
         if (o.effects) Engine._internal.applyEffects(s, o.effects);
         advance(scene.months || 1, o.plan);
+        settleView();
       });
       area.appendChild(wrap);
     });
-    scrollChat();
   }
 
   function advance(remaining, planId) {
@@ -2779,6 +2860,7 @@ b { color: var(--accent-deep); font-weight: 700; }
     var pct = Math.round(amount / ui.setup.salary * 100);
     pushBubble({ t: 'sys', text: '一个 offer：' + amount.toLocaleString() + ' 元/月（你原工资的 ' + pct + '%）。' });
     pushBubble({ t: 'axan', text: '接不接？我先不问你的理想，只问一句：存款还够撑几个月？' });
+    settleView();
 
     var row = doc.createElement('div');
     row.className = 'offer-actions';
@@ -2786,18 +2868,20 @@ b { color: var(--accent-deep); font-weight: 700; }
     var rej = mkBtn('拒绝，再等等', 'btn soft');
     acc.addEventListener('click', function () {
       Engine.acceptOffer(ui.state);
+      pushBubble({ t: 'sys', text: '你在入职邮件上点了同意。阿岸说：先上岸，别急着证明什么。' });
       showEnd();
     });
     rej.addEventListener('click', function () {
+
       Engine.rejectOffer(ui.state);
       pushBubble({ t: 'me', text: '（拒绝了这个 offer）' });
       pushBubble({ t: 'sys', text: '心态 -4。你把手机扣在桌上，告诉自己后面还有更好的。' });
       renderStatus();
       advance(remaining, planId);
+      settleView();
     });
     row.appendChild(acc); row.appendChild(rej);
     area.appendChild(row);
-    scrollChat();
   }
 
   // ================= 结局 =================
